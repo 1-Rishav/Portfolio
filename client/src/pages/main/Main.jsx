@@ -5,6 +5,8 @@ import { AppleCardsCarouselDemo } from '../../components/Carousel';
 import { BackgroundBoxesDemo } from '../../components/Background_Boxes';
 import { BackgroundBeamsWithCollisionDemo } from '../../components/Footer_BeamsCollision';
 import { NavbarDemo } from '../../components/Floating_Nav';
+import ContactForm from '../../components/Form_&_Features/ContactForm'
+import {Separator} from '@/components/ui/separator'
 
 
 function Main() {
@@ -16,6 +18,8 @@ function Main() {
     <TimelineDemo />
      <AppleCardsCarouselDemo/> 
      <BackgroundBoxesDemo/>
+     <Separator className='mt-28'/>
+     <ContactForm/>
      <BackgroundBeamsWithCollisionDemo />
     </>
   )
