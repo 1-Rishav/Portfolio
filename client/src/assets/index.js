@@ -12,7 +12,7 @@ import Project10 from './Images/Project10.jpg'
 import GemXVideo from './ProjectVideos/GemX.mp4'
 import QuickFundzVideo from './ProjectVideos/QuickFundz.mp4'
 import AdvertiseVideo from './ProjectVideos/Advertise.mp4'
-import AboutVideo from './ProjectVideos/About .mp4';
+import AboutVideo from './ProjectVideos/About.mp4';
 import Rishav1 from './Images/Rishav1.jpg'
 import Rishav2 from './Images/Rishav2.jpg'
 import Rishav3 from './Images/Rishav3.jpg'
