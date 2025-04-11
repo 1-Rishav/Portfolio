@@ -1,6 +1,6 @@
 import React from 'react'
 
-function HighlightDesign({heading,subheading,image}) {
+function HighlightDesign({heading,subheading,image,end}) {
   return (
     <div className='flex flex-wrap mb-10 | lg:mb-2 w-[94vw] h-full'>
             <div className='px-2 | lg:px-3 | xl:px-4 w-full '>
@@ -22,6 +22,7 @@ function HighlightDesign({heading,subheading,image}) {
     
     '>
                   {subheading}
+                  <span className={`font-bold text-4xl text-emerald-500`}>{ end}</span>
                 </h2>
               </div>
               <div className=' px-2 | lg:px-3 | xl:px-4 w-full mb-10 | pl-10 md:pl-14 | lg:pl-24 | xl:pl-[6rem]  lg:mb-0 lg:w-7/16 md:mt-[22rem]'>
