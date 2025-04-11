@@ -99,7 +99,7 @@ function Develop_Service() {
       <div className='h-full w-full bg-white brightness-100'>
         <div className=' relative pt-20 pb-10 | lg:pt-32 lg:pb-16 | xl:pt-40 flex max-md:flex-wrap items-center justify-between h-full w-full'>
 
-          <div className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-fit text-5xl font-semibold leading-1 '><li className='text-xl text-gray-600 mb-5 '>Services</li> Got expertise in crafting <br /> full-stack web applications <br />using the MERN and PERN <br /> stack .</div>
+          <div className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-fit text-5xl font-semibold leading-1 '><li className='text-xl text-gray-600 mb-5 '>Services</li> Got expertise in crafting <br /> full-stack web applications <br />using the MERN and PERN <br /> stack <span className={`font-bold md:text-4xl xl:text-5xl sm:text-3xl max-sm:text-2xl text-xl text-emerald-500`}>.</span></div>
           {/* <div className=' px-2 | lg:px-3 | xl:px-4 w-fit mb-10 | pl-10 md:pl-14 | lg:pl-24 | xl:pl-[6rem]  lg:mb-0 lg:w-7/16 '> */}
           <div className=' items-center justify-center max-md:pt-6 h-[12rem] sm:h-[14rem] md:h-[15rem] lg:h-[17rem] xl:h-[22rem] max-md:w-full md:w-[25%] lg:w-[25%] text-3xl | md:text-2-5xl | xl:text-3xl | 4xl:text-4xl font-sans-primary tracking-tight text-black  | dark:text-grayDark-100 leading-tight text-balance  lg:pr-0  bg-transparent  rounded-2xl   flex '>
             
@@ -119,7 +119,7 @@ function Develop_Service() {
             {/* </div> */}
           </div>
         </div>
-        <div className="w-full flex flex-wrap | md:justify-end"><div className="px-2 | lg:px-3 | xl:px-4"><div className="w-full relative max-w-xl pr-10 | lg:pr-0 lg:max-w-2xl lg:pl-10"><h2 className="mb-3 text-pretty tracking-tight text-black | dark:text-grayDark-100 text-lg md:text-2-5xl xl:text-3xl 4xl:text-4xl leading-tight  font-semibold ">I bring my passion for seamless user experiences and scalable design to ambitious brands, delivering solutions that make an impact .</h2></div></div></div>
+        <div className="w-full flex flex-wrap | md:justify-end"><div className="px-2 | lg:px-3 | xl:px-4"><div className="w-full relative max-w-xl pr-10 | lg:pr-0 lg:max-w-2xl lg:pl-10"><h2 className="mb-3 text-pretty tracking-tight text-black | dark:text-grayDark-100 text-lg md:text-2-5xl xl:text-3xl 4xl:text-4xl leading-tight  font-semibold ">I bring my passion for seamless user experiences and scalable design to ambitious brands, delivering solutions that make an impact <span className={`font-bold md:text-3xl xl:text-4xl sm:text-2xl max-sm:text-xl text-lg text-emerald-500`}>.</span></h2></div></div></div>
       </div>
       <Separator className="mt-16 " />
 
