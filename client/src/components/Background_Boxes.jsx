@@ -51,7 +51,7 @@ export function BackgroundBoxesDemo() {
         className="absolute inset-0 w-full h-full bg-slate-200 z-0 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
       <Boxes />
       <div className="  mx-96 w-full h-full">
-      <div className='relative  text-black h-full w-full flex items-center mb-10 justify-center md:text-5xl xl:text-7xl sm:text-3xl max-sm:text-xl text-xl font-semibold leading-1'><li className='absolute left-0  -top-5 md:text-xl text-sm text-gray-700 mb-5 '>My Playground</li> Platforms where I solve problems and explore new concepts .</div>
+      <div className='relative  text-black h-full w-full flex items-center mb-10 justify-center md:text-5xl xl:text-7xl sm:text-3xl max-sm:text-xl text-xl font-semibold leading-1'><li className='absolute left-0  -top-5 md:text-xl text-sm text-gray-700 mb-5 '>My Playground</li> Platforms where I explore new concepts .</div>
         <div ref={carouselLeft} className="w-full h-full flex items-center justify-center ">
           <a href="https://leetcode.com/u/rajrishav011/" target="_blank">
       <h1 className={cn("md:text-4xl text-xl text-white relative z-20 w-full")}>
