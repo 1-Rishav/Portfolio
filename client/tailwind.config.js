@@ -15,6 +15,14 @@ export default {
   ],
   theme: {
   	extend: {
+		keyframes: {
+			loadbar: {
+			  '0%': { transform: 'translateX(-100%)' },
+      '30%': { transform: 'translateX(-60%)' },
+      '80%': { transform: 'translateX(-10%)' },
+      '100%': { transform: 'translateX(0%)' },
+			},
+		  },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
@@ -22,6 +30,7 @@ export default {
   		},
 		  animation: {
 			'pulse-2s': 'pulse 2s ease-in-out forwards', // Custom animation
+			loadbar: 'loadbar 4s ease-in-out forwards',
 		  },
   		colors: {
   			background: 'hsl(var(--background))',
