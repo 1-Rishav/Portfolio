@@ -6,6 +6,7 @@ import HighlightImages from '../Form_&_Features/HighlightImages'
 import { mernHighlight } from '../Data/HighlightData'
 import FeatureComponent from '../Form_&_Features/FeatureComponent'
 import images from '../../assets/index'
+import { FollowerPointerCard, FollowPointer } from '../ui/Follower_Pointer'
 
 function Mern_Highlights() {
 
@@ -49,14 +50,14 @@ function Mern_Highlights() {
       <div className='h-full w-full bg-white brightness-100'>
         <div className=' relative pt-20 pb-10 | lg:pt-32 lg:pb-16 | xl:pt-40   flex flex-wrap items-center justify-between h-full w-full'>
 
-          <div className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-full text-5xl font-medium leading-1 '><li className='text-xl text-gray-600 mb-5 '>Mern Project</li> <span className='text-blue-800'>GEMX</span> is a web application designed <br /> to provide functionalities like chat <br /> with AI, engage in voice , video calls, <br /> and generate itineraries .</div>
+          <div className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-full text-5xl font-medium leading-1 '><li className='text-xl text-gray-600 mb-5 '>Mern Project</li> <span className='text-blue-800'>GEMX</span> is a web application designed <br /> to provide functionalities like chat <br /> with AI, engage in voice , video calls, <br /> and generate itineraries <span className={`font-bold md:text-4xl xl:text-5xl sm:text-3xl max-sm:text-2xl text-xl text-emerald-500`}>.</span></div>
         </div>
-        <div className="w-full flex flex-wrap | md:justify-end"><div className="px-2 | lg:px-3 | xl:px-4"><div className="w-full relative max-w-xl pr-10 | lg:pr-0 lg:max-w-2xl lg:pl-10"><h2 className="mb-3 text-pretty tracking-tight text-black | dark:text-grayDark-100 text-lg md:text-2-5xl xl:text-3xl 4xl:text-4xl leading-tight  font-semibold ">This project mission is to revolutionize user communication and trip planning by delivering an intuitive, AI-driven platform that enhances everyday activities .</h2></div></div></div>
+        <div className="w-full flex flex-wrap | md:justify-end"><div className="px-2 | lg:px-3 | xl:px-4"><div className="w-full relative max-w-xl pr-10 | lg:pr-0 lg:max-w-2xl lg:pl-10"><h2 className="mb-3 text-pretty tracking-tight text-black | dark:text-grayDark-100 text-lg md:text-2-5xl xl:text-3xl 4xl:text-4xl leading-tight  font-semibold ">This project mission is to revolutionize user communication and trip planning by delivering an intuitive, AI-driven platform that enhances everyday activities <span className={`font-bold md:text-3xl xl:text-4xl sm:text-2xl max-sm:text-xl text-lg text-emerald-500`}>.</span></h2></div></div></div>
       </div>
 
       <Separator className="mt-16 " />
 
-      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices.' image={images.GemX_Logo} />
+      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices ' end="." image={images.GemX_Logo} />
 
       <Separator className=" mt-96" />
 
@@ -84,13 +85,15 @@ function Mern_Highlights() {
     text-balance
     
     '>
-              My project is built using a robust and modern tech stack, ensuring optimal performance, scalability, and security:
+              My project is built using a robust and modern tech stack, ensuring optimal performance, scalability, and security <span className={`font-bold md:text-4xl xl:text-5xl sm:text-3xl max-sm:text-2xl text-xl text-emerald-500`}>:</span>
             </h2>
           </div>
+          
           <div className=' px-2 | lg:px-3 | xl:px-4 w-full mb-10 | pl-10 md:pl-14 | lg:pl-24 | xl:pl-[6rem]  lg:mb-0 lg:w-7/16 '>
             <h2 className=' relative h-[100%] sm:h-[100%] md:h-[35rem] w-full text-3xl | md:text-2-4xl | xl:text-2xl | 4xl:text-4xl font-sans-primary tracking-tight text-black  | dark:text-grayDark-100 leading-tight text-balance  lg:pr-0  bg-transparent  rounded-2xl   flex '>
               <div className="relative  flex flex-col w-full h-full">
                 <div className=''>
+                  
                   {mernTechStacks.map((tech) => (
                     <>
                       <div key={tech.id} className='  group'>
@@ -109,7 +112,7 @@ function Mern_Highlights() {
 
             </h2>
           </div>
-
+          
         </div>
       </div>
 
