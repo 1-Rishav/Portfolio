@@ -61,7 +61,7 @@ function Mern_Highlights() {
 
       <Separator className=" mt-96" />
 
-      <HighlightImages videoSrc="/ProjectVideos/gemx.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
+      <HighlightImages videoSrc="/ProjectVideos/GemXVideo.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
 
       <Separator className='mt-10' />
 

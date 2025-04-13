@@ -252,7 +252,7 @@ function About() {
           
                     <video
                   ref={videoRef}
-                  src="/ProjectVideos/about.mp4"
+                  src="/ProjectVideos/About.mp4"
                   className="rounded-3xl h-[14rem] sm:h-[20rem] md:h-[32rem] lg:h-[42rem] 3xl:h-[50rem] w-full object-cover"
                   loop
                   muted={isMuted}
