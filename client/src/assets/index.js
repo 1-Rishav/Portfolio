@@ -56,5 +56,16 @@ import Skill10 from './Skills/Skill10.png'
 import Skill11 from './Skills/Skill11.png'
 import Skill12 from './Skills/Skill12.png'
 
+import Explore1 from './Web3/1.png'
+import Explore2 from './Web3/2.png'
+import Explore3 from './Web3/3.png'
+import Explore4 from './Web3/4.png'
+import Explore5 from './Web3/5.png'
+import Explore6 from './Web3/6.png'
+import Explore7 from './Web3/7.png'
+import Explore8 from './Web3/8.png'
+import Explore9 from './Web3/9.png'
+import Explore10 from './Web3/10.png'
 
-export default {Project1, Project2, Project3,Project1_i , Quick_Logo , GemX_Logo , Project4, Project5, Project6, Project7, Project8, Project9 ,Project10 ,GemXVideo,QuickFundzVideo,AdvertiseVideo,AboutVideo, Rishav1, Rishav2, Rishav3,Rishav4, Rishav5 ,Rishav6,program1,program2,program3,program4,program5,Gem1,Gem2,Gem3,Gem4,Gem5,Gem6,Gem7,Gem8,Quick1,Quick2,Quick3,Quick4,Quick5,Quick6,Skill1,Skill2,Skill3,Skill4,Skill5,Skill6,Skill7,Skill8,Skill9,Skill10,Skill11,Skill12}
+
+export default {Project1, Project2, Project3,Project1_i , Quick_Logo , GemX_Logo , Project4, Project5, Project6, Project7, Project8, Project9 ,Project10 ,GemXVideo,QuickFundzVideo,AdvertiseVideo,AboutVideo, Rishav1, Rishav2, Rishav3,Rishav4, Rishav5 ,Rishav6,program1,program2,program3,program4,program5,Gem1,Gem2,Gem3,Gem4,Gem5,Gem6,Gem7,Gem8,Quick1,Quick2,Quick3,Quick4,Quick5,Quick6,Skill1,Skill2,Skill3,Skill4,Skill5,Skill6,Skill7,Skill8,Skill9,Skill10,Skill11,Skill12,Explore1,Explore2,Explore3,Explore4,Explore5,Explore6,Explore7,Explore8,Explore9,Explore10}
