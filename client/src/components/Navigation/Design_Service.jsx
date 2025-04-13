@@ -139,7 +139,7 @@ useEffect(() => {
               {/* Image */}
               <video
               ref={videoRef}
-                src="/ProjectVideos/Advertise.mp4"
+                src="/ProjectVideos/advertise.mp4"
                 alt=""
                 loop
                 playsInline

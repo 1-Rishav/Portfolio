@@ -54,11 +54,11 @@ function Pern_Highlights() {
       </div>
       <Separator className="mt-16 " />
 
-      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices ' image={images.Quick_Logo} end="."/>
+      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices ' image={images.Quick_Logo} end="." webUrl={'https://quick-fundz.vercel.app/auth/home'} gitUrl={'https://github.com/1-Rishav/Quick_Fundz'}/>
 
       <Separator className=" mt-96" />
 
-      <HighlightImages videoSrc="/ProjectVideos/QuickFundz.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
+      <HighlightImages videoSrc="/ProjectVideos/quickfundz.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
 
       <Separator className='mt-10' />
 

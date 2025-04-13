@@ -57,11 +57,11 @@ function Mern_Highlights() {
 
       <Separator className="mt-16 " />
 
-      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices ' end="." image={images.GemX_Logo} />
+      <HighlightDesign heading='Design' subheading='Crafting user-friendly interfaces tailored to enhance user interaction.Ensures optimal viewing experiences across all devices ' end="." image={images.GemX_Logo} webUrl={'https://gem-x.vercel.app/app'} gitUrl={'https://github.com/1-Rishav/GeminiAI'}/>
 
       <Separator className=" mt-96" />
 
-      <HighlightImages videoSrc="/ProjectVideos/GemX.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
+      <HighlightImages videoSrc="/ProjectVideos/gemx.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
 
       <Separator className='mt-10' />
 

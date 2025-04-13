@@ -1,6 +1,6 @@
 import React from 'react'
 
-function HighlightDesign({heading,subheading,image,end}) {
+function HighlightDesign({heading,subheading,image,end,webUrl,gitUrl}) {
   return (
     <div className='flex flex-wrap mb-10 | lg:mb-2 w-[94vw] h-full'>
             <div className='px-2 | lg:px-3 | xl:px-4 w-full '>
@@ -31,8 +31,8 @@ function HighlightDesign({heading,subheading,image,end}) {
                     <div className="absolute z-50 grid grid-cols-[14rem,auto] grid-rows-[3rem,auto] group">
                       {/* Website Button */}
                       <div className="hidden  group-hover:block   absolute  top-0 left-0 bg-white rounded-br-2xl">
-                        <a href='' className="pr-4 pl-4 text-xl font-semibold text-black ">Website</a>
-                        <button className='p-2 text-xl font-semibold text-black '>Github</button>
+                        <a href={webUrl} className="pr-4 pl-4 text-xl font-semibold text-black ">Website</a>
+                        <a href={gitUrl} className='p-2 text-xl font-semibold text-black '>Github</a>
                       </div>
                     </div>
                     {/* Image */}
