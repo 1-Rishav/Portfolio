@@ -9,10 +9,10 @@ import Project7 from './Images/Project7.jpg'
 import Project8 from './Images/Project8.jpg'
 import Project9 from './Images/Project9.jpg'
 import Project10 from './Images/Project10.jpg'
-import GemXVideo from './ProjectVideos/GemX.mp4'
-import QuickFundzVideo from './ProjectVideos/QuickFundz.mp4'
-import AdvertiseVideo from './ProjectVideos/Advertise.mp4'
-import AboutVideo from './ProjectVideos/About.mp4';
+// import GemXVideo from './ProjectVideos/GemX.mp4'
+// import QuickFundzVideo from './ProjectVideos/QuickFundz.mp4'
+// import AdvertiseVideo from './ProjectVideos/Advertise.mp4'
+// import AboutVideo from './ProjectVideos/About.mp4';
 import Rishav1 from './Images/Rishav1.jpg'
 import Rishav2 from './Images/Rishav2.jpg'
 import Rishav3 from './Images/Rishav3.jpg'
@@ -68,4 +68,4 @@ import Explore9 from './Web3/9.png'
 import Explore10 from './Web3/10.png'
 
 
-export default {Project1, Project2, Project3,Project1_i , Quick_Logo , GemX_Logo , Project4, Project5, Project6, Project7, Project8, Project9 ,Project10 ,GemXVideo,QuickFundzVideo,AdvertiseVideo,AboutVideo, Rishav1, Rishav2, Rishav3,Rishav4, Rishav5 ,Rishav6,program1,program2,program3,program4,program5,Gem1,Gem2,Gem3,Gem4,Gem5,Gem6,Gem7,Gem8,Quick1,Quick2,Quick3,Quick4,Quick5,Quick6,Skill1,Skill2,Skill3,Skill4,Skill5,Skill6,Skill7,Skill8,Skill9,Skill10,Skill11,Skill12,Explore1,Explore2,Explore3,Explore4,Explore5,Explore6,Explore7,Explore8,Explore9,Explore10}
+export default {Project1, Project2, Project3,Project1_i , Quick_Logo , GemX_Logo , Project4, Project5, Project6, Project7, Project8, Project9 ,Project10 , Rishav1, Rishav2, Rishav3,Rishav4, Rishav5 ,Rishav6,program1,program2,program3,program4,program5,Gem1,Gem2,Gem3,Gem4,Gem5,Gem6,Gem7,Gem8,Quick1,Quick2,Quick3,Quick4,Quick5,Quick6,Skill1,Skill2,Skill3,Skill4,Skill5,Skill6,Skill7,Skill8,Skill9,Skill10,Skill11,Skill12,Explore1,Explore2,Explore3,Explore4,Explore5,Explore6,Explore7,Explore8,Explore9,Explore10}
