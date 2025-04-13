@@ -58,7 +58,7 @@ function Pern_Highlights() {
 
       <Separator className=" mt-96" />
 
-      <HighlightImages videoSrc="/ProjectVideos/QuickFundz.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
+      <HighlightImages videoSrc="/ProjectVideos/quickfundz.mp4" img2={image[currentIndex]} img3={image1[currentIndex1]} />
 
       <Separator className='mt-10' />
 
