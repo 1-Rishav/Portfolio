@@ -14,6 +14,35 @@ function About() {
   const [isMuted, setIsMuted] = useState(false);
   const [customCursor, setCustomCursor] = useState('default');
 
+  const webImages=[
+    images.Skill1,
+    images.Skill2,
+    images.Skill3,
+    images.Skill4,
+    images.Skill5,
+    images.Skill6,
+    images.Skill7,
+    images.Skill8,
+    images.Skill9,
+    images.Skill10,
+    images.Skill11,
+    images.Skill12,
+
+  ]
+
+  const Web3Images=[
+    images.Explore1,
+    images.Explore2,
+    images.Explore3,
+    images.Explore4,
+    images.Explore5,
+    images.Explore6,
+    images.Explore7,
+    images.Explore8,
+    images.Explore9,
+    images.Explore10,
+  ]
+
   // useEffect(() => {
   //   const carousel = carouselRight.current;
   //   const images = Array.from(carousel.children);
@@ -50,38 +79,38 @@ function About() {
   // }, []);
 
   useEffect(() => {
-    const carousel = carouselLeft.current;
-    const images = Array.from(carousel.children);
-    const imageWidth = images[0].offsetWidth;
-
-    // GSAP Timeline for Smooth Movement
-    const timeline = gsap.timeline({
-      repeat: -1, // Infinite loop
-      defaults: { ease: "linear", duration: 5 }, // Smooth and consistent speed
-    });
-
-    timeline.to(carousel, {
-      x: `-=${imageWidth}`, // Move carousel to the right
-      onComplete: () => {
-        // Clone the first image instead of moving it
-        const firstImage = carousel.firstElementChild;
-        const cloneFirstImage = firstImage.cloneNode(true);
-
-        // Append the cloned image to the end
-        carousel.appendChild(cloneFirstImage);
-
-        // Remove the original first image
-        firstImage.remove();
-
-        // Reset position to avoid jump
-        gsap.set(carousel, { x: `+=${imageWidth}` });
-      },
-    });
-
-    return () => {
-      timeline.kill(); // Cleanup GSAP animation on unmount
-    };
-  }, []);
+      const carousel = carouselLeft.current;
+      const images = Array.from(carousel.children);
+      const imageWidth = images[0].offsetWidth;
+  
+      // GSAP Timeline for Smooth Movement
+      const timeline = gsap.timeline({
+        repeat: -1, // Infinite loop
+        defaults: { ease: "linear", duration: 5 }, // Smooth and consistent speed
+      });
+  
+      timeline.to(carousel, {
+        x: `-=${imageWidth}`, // Move carousel to the right
+        onComplete: () => {
+          // Clone the first image instead of moving it
+          const firstImage = carousel.firstElementChild;
+          const cloneFirstImage = firstImage.cloneNode(true);
+  
+          // Append the cloned image to the end
+          carousel.appendChild(cloneFirstImage);
+  
+          // Remove the original first image
+          firstImage.remove();
+  
+          // Reset position to avoid jump
+          gsap.set(carousel, { x: `+=${imageWidth}` });
+        },
+      });
+  
+      return () => {
+        timeline.kill(); // Cleanup GSAP animation on unmount
+      };
+    }, []);
   useEffect(() => {
     const carousel = carouselRight.current;
     const images = Array.from(carousel.children);
@@ -263,15 +292,19 @@ function About() {
 
               <div ref={carouselRight} style={{ display: "flex", willChange: "transform" }} className=' h-40  flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
 
-                <CustomImages img1={images.Skill1} img2={images.Skill2} img3={images.Skill3} img4={images.Skill4} img5={images.Skill5} img6={images.Skill6} img7={images.Skill7} img8={images.Skill8} img9={images.Skill9} img10={images.Skill10} img11={images.Skill11} img12={images.Skill12} />
+                <CustomImages images={webImages} />
 
               </div>
             </div>
+            <div className='w-full pl-2 | max-sm:pl-5 | md:pl-10 | lg:pl-10 | xl:pl-20 | 4xl:pl-40 mt-5 inline-flex items-start justify-start relative group outline-none  | focus:outline-none '>
+                <a className="w-fit mt-5 inline-flex items-start justify-start relative group outline-none  | focus:outline-none "><div className="w-auto  bg-amber-400 inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-gray-600 py-2 px-5"><div className="md:text-xl font-bold relative inline-flex items-center justify-center top-px flex-shrink-0 bg-amber-400"><div>
+                  Exploring</div></div></div><div className="md:text-xl font-bold bg-amber-400 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | md:w-11 md:h-11 | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-180 | js-button-icon"><GoArrowUpRight /></div></a>
+              </div>
             <div className=' overflow-hidden transform-gpu  | dark:bg-grayDark-500 h-[50%] flex   gap-5 items-center justify-center'>
 
               <div ref={carouselLeft} style={{ display: "flex", willChange: "transform" }} className=' h-40 flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
 
-                <CustomImages img1={'GemX'} img2={'Gemx_front'} img3={'GemX_home'} img4={'GemX_logo'} img5={'QuickFundz'} img6={'style'} img7={'GemX_logo'} img8={'GemX_home'} />
+                <CustomImages images={Web3Images} />
 
               </div>
             </div>
