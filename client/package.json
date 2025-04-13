@@ -36,6 +36,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
     "react-syntax-highlighter": "^15.6.1",
+    "react-toastify": "^11.0.5",
     "rollup": "^3.29.5",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
