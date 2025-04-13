@@ -1,8 +1,9 @@
 import { Input } from "@nextui-org/input";
 import { Textarea } from "@nextui-org/input";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { GoArrowUpRight } from "react-icons/go";
 import axios from "../../utils/axios";
+import { toast } from "react-toastify";
 
 function ProjectForm({file}) {
   const [enteredValue , setEnteredValue] =useState({
@@ -60,10 +61,11 @@ console.log(Object.fromEntries(formData.entries()));
     setError(true);
     try {
       const response = await axios.post('project/new-project',formData,{ withCredentials:true,headers: { 'Content-Type': 'multipart/form-data' }});
-      
+      toast.success(response.data.message);
       window.location.reload();
     } catch (error) {
-      console.log(error)
+      
+      toast.error(error.message);
     }
     
     

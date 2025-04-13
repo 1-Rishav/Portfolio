@@ -1,8 +1,9 @@
 import { Input } from "@nextui-org/input";
 import { Textarea } from "@nextui-org/input";
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { GoArrowUpRight } from "react-icons/go";
 import axios from "../../utils/axios";
+import { toast } from "react-toastify";
 
 function ContactForm() {
   const [enteredValue , setEnteredValue] =useState({
@@ -47,13 +48,17 @@ function ContactForm() {
     setEnteredValue('')
     try {
       const response = await axios.post('contact/contactPage',data,{ withCredentials:true});
-      return response.data;
+      
+      toast.success(response.data.message)
+      window.location.reload();
     } catch (error) {
       console.log(error)
+      toast.error(error.message)
     }
     
     
   }
+  
   return (
     <>
       <div className="w-full pb-20 | lg:pb-20 | 2xl:pb-28 | 4xl:pb-32 mt-20 xl:px-20 lg:px-14 md:px-10 max-md:px-5">
