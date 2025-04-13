@@ -59,18 +59,19 @@ export const Advertise = () => {
           <p
             className="text-neutral-600 text-base md:text-2xl font-sans max-w-3xl mx-auto">
             <span className="font-bold text-neutral-700">
-            A web application designed to simplify peer-to-peer lending with security, transparency, and flexibility. It connects verified borrowers and lenders, allowing seamless loan requests, negotiations, and secure transactions.            </span>{" "}
+            Brand Fusion is a single-page website designed to showcase modern front-end design techniques such as scroll-triggered animations, minimalist UI, and responsive layouts.Its real purpose is to demonstrate creative design elements that can be repurposed to advertise or brand any product or service.          
+ </span>{" "}
             <br/>GitHub:
-            <CodeBlockDemo name={'GitHub Link'} syntax={'https://github.com/1-Rishav/Quick_Fundz'}/>
+            <CodeBlockDemo name={'GitHub Link'} syntax={'https://github.com/1-Rishav/Advertisement-Web-app'}/>
             WebSite:
-            <CodeBlockDemo name={'WebSite Link'} syntax={'https://quick-fundz.vercel.app/auth/home'}/>
+            <CodeBlockDemo name={'WebSite Link'} syntax={'https://brand-fusion.netlify.app/'}/>
           </p>
           <img
             src={images.Project3}
             alt="Brand Fusion Image"
             height="500"
             width="500"
-            className="md:w-1/2 md:h-1/2 h-full w-full mx-auto object-contain" />
+            className="md:w-1/2 md:h-1/2 h-full w-full mx-auto object-contain mt-10" />
         </div>
   </>);
 };
@@ -82,18 +83,19 @@ export const GeoPix = () => {
             <p
               className="text-neutral-600 text-base md:text-2xl font-sans max-w-3xl mx-auto">
               <span className="font-bold text-neutral-700">
-              A web application designed to simplify peer-to-peer lending with security, transparency, and flexibility. It connects verified borrowers and lenders, allowing seamless loan requests, negotiations, and secure transactions.            </span>{" "}
+              GeoPix is a sleek, interactive web application that allows users to explore a world map-based photo gallery. Users can click on different locations to view associated photos.
+                          </span>{" "}
             <br/>GitHub:
-            <CodeBlockDemo name={'GitHub Link'} syntax={'https://github.com/1-Rishav/Quick_Fundz'}/>
+            <CodeBlockDemo name={'GitHub Link'} syntax={'https://github.com/1-Rishav/GeoPix'}/>
             WebSite:
-            <CodeBlockDemo name={'WebSite Link'} syntax={'https://quick-fundz.vercel.app/auth/home'}/>
+            <CodeBlockDemo name={'WebSite Link'} syntax={'https://geopix.netlify.app/'}/>
             </p>
             <img
               src={images.Project10}
               alt="GeoPix Image"
               height="500"
               width="500"
-              className="md:w-1/2 md:h-1/2 h-full w-full mx-auto object-contain" />
+              className="md:w-1/2 md:h-1/2 h-full w-full mx-auto object-contain mt-10" />
           </div>
     </>);
   };
