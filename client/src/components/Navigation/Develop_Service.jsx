@@ -10,6 +10,20 @@ function Develop_Service() {
   const carouselRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
     
+  const DevelopImages=[
+   images.Project1_i,
+   images.Project2,
+   images.GemX_Logo,
+   images.Project1,
+   images.Quick_Logo,
+   images.Project3,
+   images.Project4,
+   images.Project5,
+   images.Project6,
+   images.Project7,
+   images.Project8,
+   images.Project9
+  ]
       // ✅ Image array for loop
       const image = [
         images.Gem2,
@@ -154,7 +168,7 @@ function Develop_Service() {
 
               <div ref={carouselRef} style={{ display: "flex", willChange: "transform" }} className=' h-40  flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
 
-                <CustomImages img1={images.Project1_i} img2={images.Project2} img3={images.GemX_Logo} img4={images.Project1} img5={images.Quick_Logo} img6={images.Project3} img7={images.Project4} img8={images.Project5} img9={images.Project6} img10={images.Project7} img11={images.Project8} img12={images.Project9} />
+                <CustomImages images={DevelopImages} />
 
               </div>
             </div>
