@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BASE_URL = 'https://portfolio-2hf5.onrender.com/' /* 'http://localhost:3001/' */
+const BASE_URL = 'https://portfolio-z306.onrender.com/' /* 'http://localhost:3001/' */
 
 const axiosInstance = axios.create({baseURL: BASE_URL})
 
