@@ -5,6 +5,8 @@ import ProjectForm from '../Form_&_Features/ProjectForm'
 
 function AssignProject() {
 const [fileData , setFileData] = useState(null);
+const [fileValue , setFileValue] = useState(false);
+
   const handleFile=(file)=>{
     // try {
     //   const formData=new FormData();
@@ -35,13 +37,13 @@ const [fileData , setFileData] = useState(null);
                         <div className='flex max-md:flex-wrap items-center justify-center   w-full h-fit mt-[2rem]'>
                           <div className=' px-2 | lg:px-3 | xl:px-4 w-full mb-5 | pl-10 md:pl-14 | lg:pl-24 | xl:pl-[6rem]  lg:mb-0 lg:w-7/16'>
                             <div className='text-3xl | md:text-2-5xl | xl:text-4xl | 4xl:text-5xl font-sans-primary tracking-normal font-semibold text-balance'>
-                              <FileUploadDemo selectedFile={handleFile}/>
+                              <FileUploadDemo selectedFile={handleFile} setValue={fileValue}/>
                             </div>
                           </div>                
                         </div>
                       </div>
              <Separator className='mt-20'/>
-             <ProjectForm file={fileData}/>
+             <ProjectForm file={fileData} setFileValue={setFileValue}/>
              <Separator/>
     </>
   )
