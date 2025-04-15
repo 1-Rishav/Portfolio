@@ -5,7 +5,7 @@ import { GoArrowUpRight } from "react-icons/go";
 import axios from "../../utils/axios";
 import { toast } from "react-toastify";
 
-function ProjectForm({file}) {
+function ProjectForm({file , setFileValue}) {
   const [enteredValue , setEnteredValue] =useState({
     name:'',
     email:'',
@@ -54,20 +54,18 @@ Object.entries(enteredValue).forEach(([key, value]) => {
 if (file) {
   formData.append('file', file[0]); // Ensure file is a valid File object
 }
-console.log(Object.fromEntries(formData.entries()));
+//console.log(Object.fromEntries(formData.entries()));
     
-
-    setEnteredValue('')
-    setError(true);
     try {
       const response = await axios.post('project/new-project',formData,{ withCredentials:true,headers: { 'Content-Type': 'multipart/form-data' }});
       toast.success(response.data.message);
-      window.location.reload();
-    } catch (error) {
       
+    } catch (error) {
       toast.error(error.message);
     }
-    
+    setEnteredValue('')
+    setFileValue(true)
+    setError(true);
     
   }
   return (
