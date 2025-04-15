@@ -63,7 +63,13 @@ if (file) {
     } catch (error) {
       toast.error(error.message);
     }
-    setEnteredValue('')
+    setEnteredValue({
+      name:'',
+      email:'',
+      phone:'',
+      type:'',
+      describe:''
+      })
     setFileValue(true)
     setError(true);
     

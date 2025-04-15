@@ -52,7 +52,13 @@ function ContactForm() {
     } catch (error) {
       toast.error(error.message)
     }
-    setEnteredValue('')
+    setEnteredValue({
+    name:'',
+    email:'',
+    phone:'',
+    type:'',
+    describe:''
+    })
     setError(true);
     
   }
