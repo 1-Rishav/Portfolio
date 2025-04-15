@@ -1,5 +1,5 @@
 import { cn } from "../../utils/cn";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 //import { IconUpload } from "@tabler/icons-react";
 import { MdOutlineFileUpload } from "react-icons/md";
@@ -27,7 +27,7 @@ const secondaryVariant = {
 };
 
 export const FileUpload = ({
-  onChange
+  onChange , value
 }) => {
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -36,6 +36,12 @@ export const FileUpload = ({
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     onChange && onChange(newFiles);
   };
+
+  useEffect(() => {
+    if (value) {
+      setFiles([]);
+    }
+  }, [value])
 
   const handleClick = () => {
     fileInputRef.current?.click();
