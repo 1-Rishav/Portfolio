@@ -82,7 +82,7 @@ function ContactForm() {
               <Input label="Company" size="md" variant="faded" type="text" value={enteredValue.type} onChange={(e)=>handleChange('type',e)} isRequired  />
             </div>
             <div className="flex px-2 w-full flex-wrap md:flex-nowrap gap-4 ">
-              <Textarea label="Description" variant="faded" placeholder="Describe your query" value={enteredValue.describe} onChange={(e)=>handleChange('describe',e)}   />
+              <Textarea label="Description" variant="faded" placeholder="Describe your query" value={enteredValue.describe} onChange={(e)=>handleChange('describe',e)}  isRequired/>
             </div>
             <button type="submit" disabled={error} onClick={handleSubmit}  className="  inline-flex relative group outline-none  | focus:outline-none "><div className={`w-auto ${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'} inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-black py-2 px-5`}><div className={`relative inline-flex items-center justify-center top-px flex-shrink-0  ${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'}`}><div>
                 Ready to connect</div></div></div><div className={`${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'} flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon`}><GoArrowUpRight /></div></button>
