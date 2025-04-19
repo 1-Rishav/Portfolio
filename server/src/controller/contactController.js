@@ -1,3 +1,4 @@
+const Contact = require('../models/contact');
 const ContactModel = require('../models/contact');
 
 
@@ -11,4 +12,14 @@ exports.contactPage = async(req,res)=>{
    } catch (error) {
       return res.status(401).json({message:"Something went wrong!"})
    }
+}
+
+exports.allConnection = async(req,res)=>{
+try {
+   const user = await ContactModel.find();
+   console.log(user);
+   return res.status(200).json({message:"Connection retrieve successfully",user})
+} catch (error) {
+   return res.status(401).json({message:"Can't fetch data"})
+}
 }

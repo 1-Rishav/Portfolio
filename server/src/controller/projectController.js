@@ -34,3 +34,12 @@ exports.newProject= async(req,res)=>{
         return res.status(400).json({message:'Something went wrong'})
     }
 }
+
+exports.allAssignedProject = async(req,res)=>{
+  try {
+    const projects = await ProjectModel.find();
+    return res.status(200).json({message:'All projects fetched successfully'})
+  } catch (error) {
+    return res.status(401).json({message:"Can't fetch projects"})
+  }
+}
