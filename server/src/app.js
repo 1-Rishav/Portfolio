@@ -6,11 +6,12 @@ const helmet = require('helmet');
 const mongoSanitize =require('express-mongo-sanitize')
 const bodyParser = require('body-parser')
 const cors = require("cors")
+const cookieParser = require("cookie-parser")
 
 const app = express();
 
 app.use( cors({
-    origin:"https://rishav-labs.vercel.app"    /* process.env.FRONTEND_URL */,
+    origin:/* "https://rishav-labs.vercel.app" */    process.env.FRONTEND_URL,
     methods:['GET','POST','DELETE','PUT','PATCH'],
     credentials:true,
 }))
@@ -27,6 +28,7 @@ app.use(helmet());
 app.use(morgan('combined'));
 app.use(mongoSanitize());
 app.use(routes);
+app.use(cookieParser());
 
 const limiter = rateLimit({
     windowMs: 60*60*1000,
