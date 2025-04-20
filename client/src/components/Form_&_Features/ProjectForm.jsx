@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { GoArrowUpRight } from "react-icons/go";
 import axios from "../../utils/axios";
 import { toast } from "react-toastify";
+import LoadingScreen from "../LoadingScreen";
 
 function ProjectForm({file , setFileValue}) {
   const [enteredValue , setEnteredValue] =useState({
@@ -15,7 +16,7 @@ function ProjectForm({file , setFileValue}) {
 
   })
   const [error , setError] = useState(true)
- 
+  const [loading , setLoading]=useState(false)
 
 
   const handleChange = (name,e)=>{
@@ -57,9 +58,10 @@ if (file) {
 //console.log(Object.fromEntries(formData.entries()));
     
     try {
+      setLoading(true)
       const response = await axios.post('project/new-project',formData,{ withCredentials:true,headers: { 'Content-Type': 'multipart/form-data' }});
       toast.success(response.data.message);
-      
+      setLoading(false)
     } catch (error) {
       toast.error(error.message);
     }
@@ -102,7 +104,7 @@ if (file) {
               <Textarea label="Description" variant="faded" placeholder="Describe your project" value={enteredValue.describe} onChange={(e)=>handleChange('describe',e)} isRequired  />
             </div>
             <button type="submit" disabled={error} onClick={handleSubmit}  className="  inline-flex items-center relative group outline-none  | focus:outline-none "><div className={`w-auto ${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'} inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-black py-2 px-5`}><div className={`relative inline-flex items-center justify-center top-px flex-shrink-0  ${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'}`}><div>
-                Assign</div></div></div><div className={`${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'} hover:bg-emerald-700 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon`}><GoArrowUpRight /></div></button>
+              {loading ? <LoadingScreen/> : "Assign"}  </div></div></div><div className={`${error? 'bg-gray-400 cursor-not-allowed':'bg-emerald-300'} hover:bg-emerald-700 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon`}><GoArrowUpRight /></div></button>
           </div>
 
         </div>
