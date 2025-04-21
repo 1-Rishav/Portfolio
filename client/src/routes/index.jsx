@@ -14,6 +14,11 @@ import Labs from '../pages/ScreenNav/LabsPage'
 import Mobile_Highlights from '../pages/MobileNav/HighlightsPage'
 import Mobile_Service from '../pages/MobileNav/ServicesPage';
 import LoadingHome from '../components/Form_&_Features/LoadingHome'
+import AdminLayout from "../layout/adminLayout";
+import Login from "../auth/Login";
+import Signup from "../auth/Signup";
+import AssignedProjects from "../pages/AdminNav/AssignedProjectsPage";
+import Connections from "../pages/AdminNav/ConnectionsPage";
 const Loadable = (Component) => (props) => {
     return (
       <Suspense fallback={<LoadingHome/>}>
@@ -41,7 +46,21 @@ export default function Router(){
                 {path: 'services',element:<Mobile_Service/>},
                 { path: "*", element: <Navigate to="/404" replace /> }
             ]
-        }
+        },
+        
+        {
+          path:'/admin',
+          element:<AdminLayout/>,
+          children:[
+            {element: <Navigate to="/admin/login" replace/>,index:true},
+            {path:'signup', element:<Signup/>},
+            {path:'login',element:<Login/>},
+            {path:'menu',element:<Main/>},
+            {path:'connections',element:<Connections/>},
+            {path:'assignedProjects',element:<AssignedProjects/>}
+          ]
+        },
+        
     ])
 }
 
