@@ -1,14 +1,13 @@
 
-import {  Outlet,useLocation  } from "react-router-dom";
+import {  Navigate, Outlet,useLocation  } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import LoadingBar from "../../components/Form_&_Features/LoadingBar";
+import { useSelector } from "react-redux";
 //import { useSelector } from "react-redux";
 
 
-const NavLayout = () => {
+const UserLayout = () => {
   //const isLoggedIn = true;
-  // {isLoggedIn &&  
-  // <Navigate to='/'/>}
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
@@ -40,14 +39,19 @@ const NavLayout = () => {
     }
   }, [location.pathname]);
   
+  // if(isLoggedIn){
+  //  if(role==="admin"){
+  //   return <Navigate to='/admin'/>
+  //  }
+  // }
   return (
     <>
     <LoadingBar loading={loading} />
-    <div className="pt-4"> {/* padding to avoid content behind bar */}
+    <div>
         <Outlet />
       </div>
     </>
   );
 };
 
-export default NavLayout;
+export default UserLayout;
