@@ -38,8 +38,31 @@ exports.newProject= async(req,res)=>{
 exports.allAssignedProject = async(req,res)=>{
   try {
     const projects = await ProjectModel.find();
-    return res.status(200).json({message:'All projects fetched successfully'})
+    return res.status(200).json({message:'All projects fetched successfully',projects})
   } catch (error) {
     return res.status(401).json({message:"Can't fetch projects"})
   }
+}
+
+exports.completedProject = async(req,res)=>{
+   const {id , status}=req.body;
+   try {
+      const projectStatus = await ProjectModel.findByIdAndUpdate(
+         id,
+         { view: status },
+         { new: true } 
+       );
+   
+       if (!projectStatus) {
+         return res.status(404).json({ message: "Project not found" });
+       }
+   
+       res.status(200).json({
+         message: "Project status updated successfully"
+         
+       });
+   } catch (error) {
+    console.log(error);
+      res.status(401).json({message:"Something went wrong"})
+   }
 }
