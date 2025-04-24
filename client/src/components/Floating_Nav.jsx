@@ -138,11 +138,11 @@ export const NavbarDemo = () => {
           <Menu setActive={setActive} >
             {role==="admin" ? (
               <>
-              <button onClick={() => navigate('/connections')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+              <button onClick={() => navigate('/admin/connections')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               Connections
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
-              <button onClick={() => navigate('/assignedProjects')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+              <button onClick={() => navigate('/admin/assignedProjects')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               AssignedProjects
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
@@ -221,11 +221,11 @@ export const NavbarDemo = () => {
               <motion.div className=" absolute z-10 lg:hidden  left-0  h-[70vh] w-[100vw] rounded-xl  bg-neutral-100 flex flex-col gap-5 top-20">
                 {role==="admin" ?(
                   <>
-                  <div onClick={()=>navigate('/connections')} className="relative cursor-pointer max-lg:px-8 max-sm:text-3xl md:text-5xl  max-lg:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+                  <div onClick={()=>navigate('/admin/connections')} className="relative cursor-pointer max-lg:px-8 max-sm:text-3xl md:text-5xl  max-lg:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
                   Connections
                    <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[50%]  group-hover:w-[22%]"></span>
                 </div>
-                  <div onClick={()=>navigate('/assignedProjects')} className="relative cursor-pointer max-lg:px-8 max-sm:text-3xl md:text-5xl  max-lg:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+                  <div onClick={()=>navigate('/admin/assignedProjects')} className="relative cursor-pointer max-lg:px-8 max-sm:text-3xl md:text-5xl  max-lg:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
                   AssignedProjects
                    <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[70%] group-hover:w-[22%]"></span>
                 </div>
