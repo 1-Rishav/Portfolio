@@ -17,9 +17,30 @@ exports.contactPage = async(req,res)=>{
 exports.allConnection = async(req,res)=>{
 try {
    const user = await ContactModel.find();
-   console.log(user);
    return res.status(200).json({message:"Connection retrieve successfully",user})
 } catch (error) {
    return res.status(401).json({message:"Can't fetch data"})
 }
+}
+
+exports.connected = async(req,res)=>{
+   const {id , status}=req.body;
+   try {
+      const updatedUser = await ContactModel.findByIdAndUpdate(
+         id,
+         { view: status },
+         { new: true } 
+       );
+   
+       if (!updatedUser) {
+         return res.status(404).json({ message: "User not found" });
+       }
+   
+       res.status(200).json({
+         message: "User status updated successfully"
+         
+       });
+   } catch (error) {
+      res.status(401).json({message:"Something went wrong"})
+   }
 }
