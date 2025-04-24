@@ -156,13 +156,13 @@ export const NavbarDemo = () => {
                 <ProductItem
                   title="MERN Pride Project"
                   src={images.Gem2}
-                  description="Prepare for tech interviews like never before."
+                  description=""
                   href='/mern-highlights'
                 />
                 <ProductItem
                   title="PERN Pride Project"
                   src={images.Quick1}
-                  description="Production ready Tailwind css components for your next project"
+                  description=""
                   href='/pern-highlights'
                 />
 
@@ -174,14 +174,14 @@ export const NavbarDemo = () => {
                 <ProductItem
                   title="Web Development"
                   href='/develop-services'
-                  src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.51.31%E2%80%AFPM.png"
-                  description="Never write from scratch again. Go from idea to blog in minutes."
+                  src={images.Project1_i}
+                  description=""
                 />
                 <ProductItem
                   title="Web Design"
                   href='/design-services'
-                  src="https://assets.aceternity.com/demos/Screenshot+2024-02-21+at+11.47.07%E2%80%AFPM.png"
-                  description="Respond to government RFPs, RFIs and RFQs 10x faster using AI"
+                  src={images.Project3}
+                  description=""
                 />
               </div>
             </MenuItem>
