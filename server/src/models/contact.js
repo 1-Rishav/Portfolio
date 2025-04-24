@@ -16,7 +16,12 @@ const contactSchema = new mongoose.Schema({
     },
     phone: { type: String, required: [true, 'Number is required'] },
     business: { type: String, default: '' },
-    describe: { type: String, default:''}
+    describe: { type: String, default:''},
+    view:{
+        type: String,
+    enum: ['observed','unobserved'], // ✅ enum restriction
+    default: 'unobserved'
+    }
 
 }, { timestamps: true });
 

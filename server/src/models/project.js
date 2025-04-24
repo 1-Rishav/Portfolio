@@ -25,6 +25,11 @@ const projectSchema = new mongoose.Schema({
     describe: { type: String, default:''},
     file: {
         type: String, required: [true, 'File is required']
+    },
+    view:{
+        type: String,
+    enum: ['observed','unobserved'], // ✅ enum restriction
+    default: 'unobserved'
     }
 
 }, { timestamps: true });
