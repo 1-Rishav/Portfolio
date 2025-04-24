@@ -3,5 +3,6 @@ const projectController = require('../controller/projectController')
 const {upload} = require('../middleware/cloudinary.middleware')
 router.post('/new-project',upload.single('file'),projectController.newProject)
 router.get('/projects',projectController.allAssignedProject)
+router.post('/checkStatus',projectController.completedProject)
 
 module.exports = router;
