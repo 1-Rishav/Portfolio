@@ -22,6 +22,14 @@ export default {
       '80%': { transform: 'translateX(-10%)' },
       '100%': { transform: 'translateX(0%)' },
 			},
+			meteor: {
+				"0%": { transform: "rotate(215deg) translateX(0)", opacity: "1" },
+				"70%": { opacity: "1" },
+				"100%": {
+				  transform: "rotate(215deg) translateX(-500px)",
+				  opacity: "0",
+				},
+			  },
 		  },
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -31,6 +39,7 @@ export default {
 		  animation: {
 			'pulse-2s': 'pulse 2s ease-in-out forwards', // Custom animation
 			loadbar: 'loadbar 4s ease-in-out forwards',
+			"meteor-effect": "meteor 5s linear infinite",
 		  },
   		colors: {
   			background: 'hsl(var(--background))',
