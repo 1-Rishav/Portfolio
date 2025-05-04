@@ -50,7 +50,7 @@ const FloatingDockMobile = ({
                   },
                 }}
                 transition={{ delay: (item.length - 1 - idx) * 0.05 }}>
-                <Link
+                <a
                   href={item.href}
                    target="_blank"
                   rel="noopener noreferrer"
@@ -59,7 +59,7 @@ const FloatingDockMobile = ({
                   
                   >
                   <div className="h-4 w-4">{item.icon}</div>
-                </Link>
+                </a>
               </motion.div>
             ))}
           </motion.div>
