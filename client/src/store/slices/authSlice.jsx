@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {toast} from 'react-toastify';
 import axios from '../../utils/axios'
-import { persistor } from "..";
+import { persistor } from "../index";
 const initialState = {
     isLoggedIn:false,
     role:'user',
