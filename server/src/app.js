@@ -11,7 +11,7 @@ const cookieParser = require("cookie-parser")
 const app = express();
 
 app.use( cors({
-    origin: "https://rishav-labs.vercel.app"     /*process.env.FRONTEND_URL*/,
+    origin: "https://rishav-labs.vercel.app"||"https://www.rajrishav.co.in/"    /*  process.env.FRONTEND_URL */,
     methods:['GET','POST','DELETE','PUT','PATCH'],
     credentials:true,
 }))
