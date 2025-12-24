@@ -12,7 +12,7 @@ app.get('/',(req, res) =>{
 })
 
 
-const url = 'https://portfolio-z306.onrender.com'; 
+const url = 'https://portfolio-0nkn.onrender.com'; 
 setInterval(() => {
   axios.get(url)
     .then(() => console.log('Stay awake'))
