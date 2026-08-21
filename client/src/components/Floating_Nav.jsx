@@ -15,6 +15,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import images from '../assets/index'
 import {useDispatch, useSelector} from 'react-redux'
 import { LogOut } from "../store/slices/authSlice";
+import AuthModal from "./auth/AuthModal";
 
 const transition = {
   type: "spring",
@@ -100,7 +101,8 @@ export const NavbarDemo = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const {role}=useSelector(state=>state.auth);
+  const {role, isLoggedIn}=useSelector(state=>state.auth);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     const direction = current - scrollYProgress.getPrevious();
     if (current < 0.03) {
@@ -124,7 +126,18 @@ export const NavbarDemo = () => {
       dispatch(LogOut());
       navigate('/', { replace: true })
     }
+
+    // Login is triggered from this navbar wherever the person happens to be -
+    // there's no dedicated route to visit. If the account is admin, send them
+    // straight into the admin area; otherwise just close the modal in place.
+    const handleAuthSuccess = (loggedInRole) => {
+      setAuthModalOpen(false);
+      if (loggedInRole === 'admin') {
+        navigate('/admin/menu');
+      }
+    }
   return (
+    <>
     <AnimatePresence mode="wait">
       {visible && (
         <motion.div
@@ -265,6 +278,10 @@ border-default
                   Labs
                   <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[24%] group-hover:w-[11%]"></span>
                 </div>
+                <div onClick={()=>{ setOpen(false); isLoggedIn ? handleLogout() : setAuthModalOpen(true); }} className="relative cursor-pointer max-lg:px-8 max-lg:text-5xl max-md:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+                  {isLoggedIn ? 'Logout' : 'Login'}
+                  <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[30%] group-hover:w-[14%]"></span>
+                </div>
                 {/* <MenuItem setActive={setActive} active={active} item="Pricing">
               <div className="flex flex-col space-y-4 text-medium">
                 <Link to="/hobby">Hobby</Link>
@@ -274,7 +291,7 @@ border-default
               </div>
             </MenuItem> */}
 
-                <a href="/assign-project" className="top-10 px-8 inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
+                <button onClick={()=>{ setOpen(false); navigate('/assign-project'); }} className="top-10 px-8 inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
 inline-flex
 items-center
 justify-center
@@ -285,7 +302,7 @@ overflow-hidden
 rounded-full
 border-default
  text-gray-600 py-2 px-5"><div className="relative inline-flex items-center justify-center top-px flex-shrink-0 bg-emerald-300"><div>
-                    Assign project</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></a>
+                    Assign project</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></button>
                   </>
                 )}
                 
@@ -321,7 +338,10 @@ border-default
 </>
             ):(
 <>
-<a href="/assign-project" className=" max-lg:hidden inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
+<button onClick={() => (isLoggedIn ? handleLogout() : setAuthModalOpen(true))} className="max-lg:hidden text-lg font-medium text-black dark:text-white hover:opacity-70 transition-opacity mr-1">
+  {isLoggedIn ? 'Logout' : 'Login'}
+</button>
+<button onClick={()=>navigate('/assign-project')} className=" max-lg:hidden inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
 inline-flex
 items-center
 justify-center
@@ -332,7 +352,7 @@ overflow-hidden
 rounded-full
 border-default
  text-gray-600 py-2 px-5"><div className="relative inline-flex items-center justify-center top-px flex-shrink-0 bg-emerald-300"><div>
-                Assign project</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></a>
+                Assign project</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></button>
 </>
             )}
             
@@ -341,5 +361,11 @@ border-default
         </motion.div>
       )}
     </AnimatePresence>
+    <AuthModal
+      isOpen={authModalOpen}
+      onClose={() => setAuthModalOpen(false)}
+      onSuccess={handleAuthSuccess}
+    />
+    </>
   );
 };
