@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { FileUploadDemo } from '../File_upload'
 import {Separator} from '@/components/ui/separator'
 import ProjectForm from '../Form_&_Features/ProjectForm'
+import AuthModal from '../auth/AuthModal'
 
 function AssignProject() {
 const [fileData , setFileData] = useState(null);
 const [fileValue , setFileValue] = useState(false);
+const { isLoggedIn } = useSelector(state => state.auth);
 
   const handleFile=(file)=>{
     // try {
@@ -26,6 +29,9 @@ const [fileValue , setFileValue] = useState(false);
                   <div className=' h-full w-fit md:text-7xl xl:text-9xl sm:text-4xl max-sm:text-2xl text-xl font-semibold leading-1 '><li className='md:text-xl text-sm text-gray-600 mb-5 '>Project</li> <span className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60'>Let’s Collaborate</span><br/> and Create<span className='text-emerald-500'>.</span></div>
                 </div>
                 <Separator/>
+                {/* Form content is blurred and non-interactive until logged in - the
+                    modal below (non-dismissable) is what actually gates submission. */}
+                <div className={isLoggedIn ? '' : 'pointer-events-none select-none blur-md'} aria-hidden={!isLoggedIn}>
                 <div className='flex flex-wrap mb-10 | lg:mb-2 w-[94vw] h-full'>
                         <div className='px-5 | lg:px-12 | xl:px-16 w-full '>
                           <div className='w-full'>
@@ -44,7 +50,17 @@ const [fileValue , setFileValue] = useState(false);
                       </div>
              <Separator className='mt-20'/>
              <ProjectForm file={fileData} setFileValue={setFileValue}/>
+             </div>
              <Separator/>
+
+             {!isLoggedIn && (
+               <AuthModal
+                 isOpen={true}
+                 allowClose={false}
+                 title="Log in to assign a project"
+                 subtitle="Please log in or create an account to submit your project details."
+               />
+             )}
     </>
   )
 }
