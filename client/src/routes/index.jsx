@@ -15,8 +15,6 @@ import Mobile_Highlights from '../pages/MobileNav/HighlightsPage'
 import Mobile_Service from '../pages/MobileNav/ServicesPage';
 import LoadingHome from '../components/Form_&_Features/LoadingHome'
 import AdminLayout from "../layout/adminLayout";
-import Login from "../auth/Login";
-import Signup from "../auth/Signup";
 import AssignedProjects from "../pages/AdminNav/AssignedProjectsPage";
 import Connections from "../pages/AdminNav/ConnectionsPage";
 const Loadable = (Component) => (props) => {
@@ -52,9 +50,7 @@ export default function Router(){
           path:'/admin',
           element:<AdminLayout/>,
           children:[
-            {element: <Navigate to="/admin/login" replace/>,index:true},
-            {path:'signup', element:<Signup/>},
-            {path:'login',element:<Login/>},
+            {element: <Navigate to="/admin/menu" replace/>,index:true},
             {path:'menu',element:<Main/>},
             {path:'connections',element:<Connections/>},
             {path:'assignedProjects',element:<AssignedProjects/>}
