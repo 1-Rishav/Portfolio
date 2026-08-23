@@ -27,8 +27,8 @@ app.use(bodyParser.json());
 app.use(helmet());
 app.use(morgan('combined'));
 app.use(mongoSanitize());
-app.use(routes);
 app.use(cookieParser());
+app.use(routes);
 
 const limiter = rateLimit({
     windowMs: 60*60*1000,
