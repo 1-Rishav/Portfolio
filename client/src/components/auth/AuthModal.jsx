@@ -1,0 +1,207 @@
+import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Input } from "@nextui-org/input"
+import { GoArrowUpRight } from "react-icons/go"
+import { AiOutlineClose } from "react-icons/ai"
+import { useDispatch } from 'react-redux'
+import { LoginUser, RegisterUser } from '../../store/slices/authSlice'
+import LoadingScreen from '../LoadingScreen'
+
+/**
+ * Reusable login/signup modal.
+ *
+ * Two usage modes:
+ *  - allowClose=true  (default): dismissable "log in if you want" trigger,
+ *    e.g. from the navbar.
+ *  - allowClose=false: a hard gate - no close button, used on Assign Project
+ *    where login is required to proceed. The modal disappears on its own
+ *    once isLoggedIn flips true in Redux (the parent stops rendering it).
+ */
+const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subtitle }) => {
+  const [mode, setMode] = useState('login') // 'login' | 'signup'
+  const [loginValue, setLoginValue] = useState({ email: '', password: '' })
+  const [signupValue, setSignupValue] = useState({ firstName: '', lastName: '', email: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch()
+
+  if (!isOpen) return null
+
+  const isLoginValid = loginValue.email.includes('@') && loginValue.password.trim().length > 0
+  const isSignupValid =
+    signupValue.firstName.trim().length >= 3 &&
+    signupValue.email.includes('@') &&
+    signupValue.password.trim().length >= 6
+
+  const resetFields = () => {
+    setLoginValue({ email: '', password: '' })
+    setSignupValue({ firstName: '', lastName: '', email: '', password: '' })
+    setMode('login')
+  }
+
+  const handleClose = () => {
+    if (!allowClose) return
+    resetFields()
+    onClose?.()
+  }
+
+  const handleLogin = async () => {
+    if (!isLoginValid || loading) return
+    setLoading(true)
+    const result = await dispatch(LoginUser(loginValue))
+    setLoading(false)
+    if (result?.success) {
+      resetFields()
+      onSuccess?.(result.role)
+    }
+  }
+
+  const handleSignup = async () => {
+    if (!isSignupValid || loading) return
+    setLoading(true)
+    const result = await dispatch(RegisterUser(signupValue))
+    setLoading(false)
+    if (result?.success) {
+      resetFields()
+      onSuccess?.(result.role)
+    }
+  }
+
+  const primaryBtnClasses = (disabled) =>
+    `w-full ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-300'} inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-black py-2.5 px-5`
+  const iconBtnClasses = (disabled) =>
+    `${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-300'} flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | group-hover:translate-x-1 group-hover:rotate-45`
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="auth-modal-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={handleClose}
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md px-4 py-8 overflow-y-auto"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.92, y: 16 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-[26rem] bg-white dark:bg-black border border-black/[0.08] dark:border-white/[0.15] rounded-3xl shadow-2xl p-6 sm:p-8 my-auto"
+        >
+          {allowClose && (
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Close"
+              className="absolute top-4 right-4 h-8 w-8 flex items-center justify-center rounded-full text-black/60 hover:text-black hover:bg-black/5 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/10 transition-colors"
+            >
+              <AiOutlineClose className="h-4 w-4" />
+            </button>
+          )}
+
+          <h3 className="text-2xl sm:text-3xl font-semibold text-black dark:text-white mb-1 pr-8">
+            {title || (mode === 'login' ? 'Welcome back' : 'Create an account')}
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            {subtitle || (mode === 'login' ? 'Log in to continue.' : 'Sign up to get started.')}
+          </p>
+
+          {mode === 'login' ? (
+            <div className="flex flex-col gap-4">
+              <Input
+                label="Email" size="md" variant="faded" type="email"
+                value={loginValue.email}
+                onChange={(e) => setLoginValue((v) => ({ ...v, email: e.target.value }))}
+                isRequired
+              />
+              <Input
+                label="Password" size="md" variant="faded" type="password"
+                value={loginValue.password}
+                onChange={(e) => setLoginValue((v) => ({ ...v, password: e.target.value }))}
+                isRequired
+              />
+
+              <button
+                type="submit"
+                disabled={!isLoginValid || loading}
+                onClick={handleLogin}
+                className="mt-1 inline-flex relative group outline-none | focus:outline-none w-full"
+              >
+                <div className={primaryBtnClasses(!isLoginValid || loading)}>
+                  <div className="relative inline-flex items-center justify-center top-px flex-shrink-0">
+                    {loading ? <LoadingScreen /> : 'Login'}
+                  </div>
+                </div>
+                <div className={iconBtnClasses(!isLoginValid || loading)}>
+                  <GoArrowUpRight />
+                </div>
+              </button>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
+                Don&apos;t have an account?{' '}
+                <button type="button" onClick={() => setMode('signup')} className="text-emerald-500 font-medium hover:underline">
+                  Sign up
+                </button>
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-3">
+                <Input
+                  label="First name" size="md" variant="faded" type="text"
+                  value={signupValue.firstName}
+                  onChange={(e) => setSignupValue((v) => ({ ...v, firstName: e.target.value }))}
+                  isRequired
+                />
+                <Input
+                  label="Last name" size="md" variant="faded" type="text"
+                  value={signupValue.lastName}
+                  onChange={(e) => setSignupValue((v) => ({ ...v, lastName: e.target.value }))}
+                />
+              </div>
+              <Input
+                label="Email" size="md" variant="faded" type="email"
+                value={signupValue.email}
+                onChange={(e) => setSignupValue((v) => ({ ...v, email: e.target.value }))}
+                isRequired
+              />
+              <Input
+                label="Password" size="md" variant="faded" type="password"
+                value={signupValue.password}
+                onChange={(e) => setSignupValue((v) => ({ ...v, password: e.target.value }))}
+                isRequired
+                errorMessage="Password must be at least 6 characters"
+              />
+
+              <button
+                type="submit"
+                disabled={!isSignupValid || loading}
+                onClick={handleSignup}
+                className="mt-1 inline-flex relative group outline-none | focus:outline-none w-full"
+              >
+                <div className={primaryBtnClasses(!isSignupValid || loading)}>
+                  <div className="relative inline-flex items-center justify-center top-px flex-shrink-0">
+                    {loading ? <LoadingScreen /> : 'Sign up'}
+                  </div>
+                </div>
+                <div className={iconBtnClasses(!isSignupValid || loading)}>
+                  <GoArrowUpRight />
+                </div>
+              </button>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
+                Already have an account?{' '}
+                <button type="button" onClick={() => setMode('login')} className="text-emerald-500 font-medium hover:underline">
+                  Login
+                </button>
+              </p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
+export default AuthModal
