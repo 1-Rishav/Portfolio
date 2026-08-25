@@ -26,9 +26,19 @@ const userSchema = new mongoose.Schema({
             message: (props) => `Email (${props.value}) is invalid!`,
         },
     },
+    // Set only for accounts created/linked via "Continue with Google". sparse:true
+    // means the unique index ignores documents where this field is absent, so
+    // regular password accounts (which never set it) don't collide with each other.
+    googleId:{
+        type:String,
+        unique:true,
+        sparse:true,
+    },
     password:{
         type:String,
-        required:[true,'Password is required'],
+        // Required for normal signups, but NOT for accounts created via Google -
+        // those never set a password at all, so there's nothing to hash/compare.
+        required:[function(){ return !this.googleId; }, 'Password is required'],
         select:false,
     }
 },{
