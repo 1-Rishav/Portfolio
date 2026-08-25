@@ -13,9 +13,9 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AiOutlineClose } from "react-icons/ai";
 import images from '../assets/index'
-import {useDispatch, useSelector} from 'react-redux'
-import { LogOut } from "../store/slices/authSlice";
+import {useSelector} from 'react-redux'
 import AuthModal from "./auth/AuthModal";
+import AccountMenu from "./auth/AccountMenu";
 
 const transition = {
   type: "spring",
@@ -99,9 +99,8 @@ export const NavbarDemo = () => {
   const [active, setActive] = useState(null);
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const {role, isLoggedIn}=useSelector(state=>state.auth);
+  const {role}=useSelector(state=>state.auth);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   useMotionValueEvent(scrollYProgress, "change", (current) => {
     const direction = current - scrollYProgress.getPrevious();
@@ -121,11 +120,6 @@ export const NavbarDemo = () => {
   const containerClassName = isTop
     ? "flex max-w-sm sm:max-w-[90%] lg:max-w-[90%] h-14 lg:h-20 fixed top-3 inset-x-0 mx-auto border border-transparent dark:border-white/[0.2] rounded-full dark:bg-black z-[5000] pr-2 pl-8 py-2 items-center justify-between "
     : "flex max-w-sm sm:max-w-screen-lg lg:max-w-screen-lg h-14 lg:h-20 fixed top-3 inset-x-0 mx-auto border border-transparent dark:border-white/[0.2] rounded-full dark:bg-black white-glassmorphism shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] z-[5000] pr-2 pl-8 py-2 items-center justify-between";
-
-    const handleLogout = async()=>{
-      dispatch(LogOut());
-      navigate('/', { replace: true })
-    }
 
     // Login is triggered from this navbar wherever the person happens to be -
     // there's no dedicated route to visit. If the account is admin, send them
@@ -243,18 +237,12 @@ export const NavbarDemo = () => {
                    <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[70%] group-hover:w-[22%]"></span>
                 </div>
 
-                <div onClick={handleLogout} className="top-10 px-8 inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
-inline-flex
-items-center
-justify-center
-relative
-leading-tight
-shadow-none
-overflow-hidden
-rounded-full
-border-default
- text-gray-600 py-2 px-5"><div className=" cursor-pointer relative inline-flex items-center justify-center top-px flex-shrink-0 bg-emerald-300"><div>
-                    Logout</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></div>
+                <div className="px-8 mt-2">
+                  <AccountMenu
+                    onRequestLogin={() => { setOpen(false); setAuthModalOpen(true); }}
+                    onAfterLogout={() => { setOpen(false); navigate('/', { replace: true }); }}
+                  />
+                </div>
                   </>
                 ):(
                   <>
@@ -278,10 +266,14 @@ border-default
                   Labs
                   <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[24%] group-hover:w-[11%]"></span>
                 </div>
-                <div onClick={()=>{ setOpen(false); isLoggedIn ? handleLogout() : setAuthModalOpen(true); }} className="relative cursor-pointer max-lg:px-8 max-lg:text-5xl max-md:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
-                  {isLoggedIn ? 'Logout' : 'Login'}
-                  <span className="ml-10  absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 max-sm:group-hover:w-[30%] group-hover:w-[14%]"></span>
+
+                <div className="px-8 mt-2">
+                  <AccountMenu
+                    onRequestLogin={() => { setOpen(false); setAuthModalOpen(true); }}
+                    onAfterLogout={() => { setOpen(false); navigate('/', { replace: true }); }}
+                  />
                 </div>
+
                 {/* <MenuItem setActive={setActive} active={active} item="Pricing">
               <div className="flex flex-col space-y-4 text-medium">
                 <Link to="/hobby">Hobby</Link>
@@ -323,24 +315,19 @@ border-default
             </button> */}
             {role==='admin' ? (
 <>
-<div onClick={handleLogout} className=" max-lg:hidden inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
-inline-flex
-items-center
-justify-center
-relative
-leading-tight
-shadow-none
-overflow-hidden
-rounded-full
-border-default
- text-gray-600 py-2 px-5"><div className=" cursor-pointer relative inline-flex items-center justify-center top-px flex-shrink-0 bg-emerald-300"><div>
-                Logout</div></div></div><div className="bg-emerald-300 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-45 | js-button-icon"><GoArrowUpRight /></div></div>
+<AccountMenu
+  onRequestLogin={() => setAuthModalOpen(true)}
+  onAfterLogout={() => navigate('/', { replace: true })}
+  className="max-lg:hidden"
+/>
 </>
             ):(
 <>
-<button onClick={() => (isLoggedIn ? handleLogout() : setAuthModalOpen(true))} className="max-lg:hidden text-lg font-medium text-black dark:text-white hover:opacity-70 transition-opacity mr-1">
-  {isLoggedIn ? 'Logout' : 'Login'}
-</button>
+<AccountMenu
+  onRequestLogin={() => setAuthModalOpen(true)}
+  onAfterLogout={() => navigate('/', { replace: true })}
+  className="max-lg:hidden mr-1"
+/>
 <button onClick={()=>navigate('/assign-project')} className=" max-lg:hidden inline-flex relative group outline-none  | focus:outline-none "><div className="w-auto bg-emerald-300
 inline-flex
 items-center

@@ -1,11 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Input } from "@nextui-org/input"
 import { GoArrowUpRight } from "react-icons/go"
 import { AiOutlineClose } from "react-icons/ai"
 import { useDispatch } from 'react-redux'
-import { LoginUser, RegisterUser } from '../../store/slices/authSlice'
+import { toast } from 'react-toastify'
+import { GoogleLogin } from '@react-oauth/google'
+import { LoginUser, RegisterUser, GoogleAuth } from '../../store/slices/authSlice'
 import LoadingScreen from '../LoadingScreen'
+
+// Only defined once a real Google Cloud OAuth Client ID is added to the
+// client .env (VITE_GOOGLE_CLIENT_ID). Until then this is undefined and the
+// Google button below simply doesn't render - everything else in this modal
+// (and the rest of the app) behaves exactly as it did before this existed.
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 /**
  * Reusable login/signup modal.
@@ -23,6 +31,18 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
   const [signupValue, setSignupValue] = useState({ firstName: '', lastName: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
+
+  // GoogleLogin's width prop is pixels, not a percentage, so it has to be
+  // measured from the actual rendered container to stay responsive across
+  // phone-width screens instead of overflowing or looking tiny.
+  const googleBtnWrapRef = useRef(null)
+  const [googleBtnWidth, setGoogleBtnWidth] = useState(320)
+
+  useEffect(() => {
+    if (isOpen && googleBtnWrapRef.current) {
+      setGoogleBtnWidth(googleBtnWrapRef.current.offsetWidth)
+    }
+  }, [isOpen, mode])
 
   if (!isOpen) return null
 
@@ -66,6 +86,21 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
     }
   }
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential || loading) return
+    setLoading(true)
+    const result = await dispatch(GoogleAuth(credentialResponse.credential))
+    setLoading(false)
+    if (result?.success) {
+      resetFields()
+      onSuccess?.(result.role)
+    }
+  }
+
+  const handleGoogleError = () => {
+    toast.error('Google sign-in was cancelled or failed.')
+  }
+
   const primaryBtnClasses = (disabled) =>
     `w-full ${disabled ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-300'} inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-black py-2.5 px-5`
   const iconBtnClasses = (disabled) =>
@@ -106,6 +141,27 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             {subtitle || (mode === 'login' ? 'Log in to continue.' : 'Sign up to get started.')}
           </p>
+
+          {googleClientId && (
+            <div className="mb-5">
+              <div ref={googleBtnWrapRef} className="w-full flex justify-center [&>div]:!w-full">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleError}
+                  theme="outline"
+                  shape="pill"
+                  size="large"
+                  width={googleBtnWidth}
+                  text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                />
+              </div>
+              <div className="flex items-center gap-3 mt-5">
+                <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+                <span className="text-xs text-gray-400 dark:text-gray-500">or continue with email</span>
+                <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+              </div>
+            </div>
+          )}
 
           {mode === 'login' ? (
             <div className="flex flex-col gap-4">
