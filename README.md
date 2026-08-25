@@ -52,7 +52,7 @@ Read every file in `client/` and `server/`, ran real `npm install` / `npm run bu
 - One `AuthModal` component serves both contexts — dismissable when triggered from the navbar (login is optional there), forced when triggered from Assign Project (login is required to proceed).
 - `CheckAuth` on app load + removing the raw JWT from Redux/localStorage together close the gap where persisted client state could claim an access level the server wouldn't actually honor.
 
-**Explicitly out of scope for this session** (noted, not forgotten — from the Session 1 flaws report):
+**Explicitly out of scope for Session 2** (noted, not forgotten — from the Session 1 flaws report):
 - Cookie `maxAge` typo (~986 years instead of ~30/360 days)
 - Rate limiter mounted after routes (still a no-op)
 - `req.file.originalname` accessed before the null check in `projectController.newProject` (confirmed still present via smoke test)
@@ -61,3 +61,37 @@ Read every file in `client/` and `server/`, ran real `npm install` / `npm run bu
 - Image/bundle size optimization
 - `/404` route doesn't exist (wildcard redirect target is itself unmatched)
 - ESLint cleanup (279 pre-existing issues, mostly prop-types/unused-vars)
+
+### Session 3 — Account menu UI + Google Sign-In (DONE, verified with a real build)
+
+**Requirements (from user):**
+1. Replace the plain-text "Login"/"Logout" nav links with an icon button (guest) / avatar+first-name pill with a dropdown (logged in) showing email + logout — matching a reference design, minus the two irrelevant menu items ("My appointments"/"My plans") from that reference.
+2. Add Google OAuth as a sign-in method, wired into the same User model and every place the auth modal is used, without changing any existing functionality.
+
+**New UI component**
+- [x] `components/auth/AccountMenu.jsx` (new) — self-contained: reads `isLoggedIn`/`firstName`/`email` from Redux directly, so it drops into both desktop nav and the mobile hamburger panel without either needing role/isLoggedIn branching of its own.
+  - Guest: circular icon button -> calls `onRequestLogin` (caller decides what that means in context - desktop just opens the modal, mobile closes the panel first)
+  - Logged in: avatar (first-initial) + first name + chevron -> click opens a small dropdown with email (top) and Log out
+  - Click-outside-to-close via a mousedown listener + ref
+- [x] `components/Floating_Nav.jsx` - full rewrite to swap all 4 previous text Login/Logout spots (desktop admin, desktop guest, mobile admin, mobile guest) for `<AccountMenu/>`. The local `handleLogout`/`dispatch`/`isLoggedIn` in this file are gone - that logic now lives once, inside AccountMenu. `onAfterLogout` callbacks replicate the exact prior behavior (navigate home, close mobile panel) so nothing changed functionally, only where the logic lives.
+
+**Google Sign-In (ID-token flow - same pattern as Brand Salon)**
+- [x] Backend: `models/user.js` - added `googleId` (unique, sparse), `password` is now conditionally required (`required: !this.googleId`) so Google-created accounts don't need one
+- [x] Backend: `controller/userController.js` - new `googleAuth` (verifies the ID token via `google-auth-library`'s `OAuth2Client.verifyIdToken`, audience-checked against `GOOGLE_CLIENT_ID`; finds-or-creates the user by email, links `googleId` if the email already existed); `registerUser`/`loginUser` now also return `firstName`/`email` (needed for the account menu); `loginUser` now gives a clear message if someone tries a password login on a Google-only account instead of crashing/confusing them
+- [x] Backend: `routes/user.route.js` - added `POST /auth/google`
+- [x] Backend: `server/.env` - added a `GOOGLE_CLIENT_ID=` placeholder with setup comments (real value has to come from the user's own Google Cloud project - see below)
+- [x] Frontend: `store/slices/authSlice.jsx` - state now also carries `firstName`/`email` (safe to persist, not credentials); new `GoogleAuth` thunk uses the exact same `{success, role}` contract as `LoginUser`/`RegisterUser`, so it plugs into every existing `onSuccess` callback (Assign Project gate, admin auto-redirect) with zero changes to those call sites
+- [x] Frontend: `components/auth/AuthModal.jsx` - added a "Continue with Google" button (mode-aware text: sign in vs sign up) above a divider, shown in both tabs since Google auth is mode-agnostic; button width is measured from its actual container via a ref (the library's `width` prop is pixels, not `%`, so this keeps it responsive instead of overflowing on narrow phones)
+- [x] Frontend: `App.jsx` - wraps `<Router/>` in `GoogleOAuthProvider` **only when `VITE_GOOGLE_CLIENT_ID` is actually set** - until then the provider isn't mounted and the Google button doesn't render, so the app behaves identically to before this feature existed
+- [x] Frontend: `client/.env.example` (new) - documents `VITE_GOOGLE_CLIENT_ID`
+- [x] Verified: full production build succeeds (0 errors); targeted lint on every touched file shows 0 new issues beyond the same pre-existing prop-types/unused-import patterns already present elsewhere
+
+**What the user still needs to do to actually activate Google Sign-In** (can't be done from here - requires their own Google account):
+1. Google Cloud Console -> create/select a project -> APIs & Services -> Credentials -> Create Credentials -> OAuth client ID -> Application type: **Web application**
+2. Authorized JavaScript origins: add `http://localhost:5173` (local dev) and the deployed Vercel URL(s)
+3. Copy the Client ID (not the secret - this flow never needs it) into `server/.env`'s `GOOGLE_CLIENT_ID` **and** `client/.env`'s `VITE_GOOGLE_CLIENT_ID` (copy `client/.env.example` -> `client/.env` first)
+4. Restart both dev servers
+
+**Explicitly out of scope for Session 3** (same pre-existing list above, still untouched - plus):
+- Did not touch the `/admin/login`-era removed pages or any Session 2 auth-protection logic beyond what's described above
+- Did not add PropTypes anywhere (pre-existing codebase-wide convention, not touched)
