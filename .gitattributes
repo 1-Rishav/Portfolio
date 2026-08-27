@@ -1,0 +1,32 @@
+# Normalizes line endings for all text files to LF, regardless of which OS
+# or editor last touched them.
+#
+# This is what caused the "137 changed files" confusion: without a policy
+# like this, git has no consistent rule, so whichever tool most recently
+# touched a file (a sandbox, a local editor, Windows vs Linux) silently
+# decides its line endings. Every line in that file then reads as "changed"
+# to git even when the actual code is identical - which is exactly why most
+# of those 137 files looked the same but still showed as modified.
+#
+# NOTE: the first time this file is committed to a repository that still has
+# CRLF files in its history (as this project's did, being originally
+# authored on Windows), git will want to renormalize those files to match -
+# expect a one-time commit that touches a lot of files. After that, this
+# stops happening for good.
+* text=auto eol=lf
+
+# Explicitly mark binary types so git never attempts text/EOL conversion on
+# them under any configuration, no matter what * text=auto above guesses.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.mp4 binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
