@@ -4,7 +4,7 @@
  * Mobile navbar is better positioned at bottom right.
  **/
 
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 import { TbLayoutNavbarCollapseFilled } from "react-icons/tb";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";

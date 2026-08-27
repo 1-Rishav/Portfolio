@@ -10,7 +10,7 @@ import React, {
 import { FaArrowLeftLong,FaArrowRightLong } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 //import img from "next/img";
 import { useOutsideClick } from "../../hooks/use_outside_click";

@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from 'gsap'
 import { Boxes } from "../components/ui/background_boxes";
-import { cn } from "../utils/cn";
+import { cn } from "@/lib/utils";
 import InvertedCard from "./NavNavigation/InvertedCard/InvertedCard";
 import images from '../assets/index'
 export function BackgroundBoxesDemo() {

@@ -1,4 +1,4 @@
-import { cn } from "../../utils/cn";
+import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 //import { IconUpload } from "@tabler/icons-react";

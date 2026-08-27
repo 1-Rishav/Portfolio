@@ -8,7 +8,7 @@ import {
 } from "framer-motion";
 import { GoArrowUpRight } from "react-icons/go";
 
-import { cn } from "../utils/cn";
+import { cn } from "@/lib/utils";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AiOutlineClose } from "react-icons/ai";
