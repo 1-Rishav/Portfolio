@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Input } from "@nextui-org/input"
+import { Input } from "@heroui/input"
 import { GoArrowUpRight } from "react-icons/go"
 import { AiOutlineClose } from "react-icons/ai"
 import { useDispatch } from 'react-redux'
