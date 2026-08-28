@@ -28,13 +28,17 @@ app.use(helmet());
 app.use(morgan('combined'));
 app.use(mongoSanitize());
 app.use(cookieParser());
-app.use(routes);
 
+// Must run before routes - previously this was defined and mounted AFTER
+// app.use(routes), which meant every request had already been fully
+// handled by the time the limiter ran. It never actually limited anything.
 const limiter = rateLimit({
     windowMs: 60*60*1000,
     limit:1000,
     message:'Too many Requests from this IP , please try again in an hour'
 })
 app.use(limiter)
+
+app.use(routes);
 
 module.exports = app;
