@@ -1,3 +1,4 @@
+const fs = require('fs');
 const ProjectModel = require('../models/project');
 const cloudinary = require('cloudinary').v2;
 
@@ -9,11 +10,17 @@ cloudinary.config({
 });
 exports.newProject= async(req,res)=>{
     const {name ,email, phone , type , describe} = req.body;
-    const fileOriginal = req.file.originalname;
+
+    // This check now runs BEFORE anything touches req.file. Previously
+    // req.file.originalname was read here first, which threw a raw
+    // TypeError (outside the try/catch below) whenever a request arrived
+    // with no file attached - the request would then hang with no response
+    // instead of returning this 400.
+    if (!req.file) {
+      return res.status(400).json({ message: 'File is required' });
+    }
+
     try {
-        if (!req.file) {
-          return res.status(400).json({ message: 'File is required' });
-        }
         const result = await cloudinary.uploader.upload(req.file.path, {
           resource_type: 'raw', // only for files 
           folder: 'Portfolio_AssignProject',
@@ -24,14 +31,20 @@ exports.newProject= async(req,res)=>{
         });
     
         const file = result.secure_url;
-        const publicId = result.public_id;
-        
-    
-        const projectData = await ProjectModel.create({name , email , phone , business:type , describe , file})
+
+        await ProjectModel.create({name , email , phone , business:type , describe , file})
         
         return res.status(200).json({message:'Project Assigned successfully'})
     } catch (error) {
-        return res.status(400).json({message:'Something went wrong'})
+        if(error.name === 'ValidationError'){
+            return res.status(400).json({message:error.message});
+        }
+        return res.status(500).json({message:'Something went wrong'})
+    } finally {
+        // multer wrote this to the OS temp dir with no cleanup of its own -
+        // remove it now that Cloudinary has (or hasn't) taken a copy, so
+        // these don't quietly accumulate on the server's local disk.
+        fs.unlink(req.file.path, () => {});
     }
 }
 
@@ -40,7 +53,7 @@ exports.allAssignedProject = async(req,res)=>{
     const projects = await ProjectModel.find();
     return res.status(200).json({message:'All projects fetched successfully',projects})
   } catch (error) {
-    return res.status(401).json({message:"Can't fetch projects"})
+    return res.status(500).json({message:"Can't fetch projects"})
   }
 }
 
@@ -50,7 +63,7 @@ exports.completedProject = async(req,res)=>{
       const projectStatus = await ProjectModel.findByIdAndUpdate(
          id,
          { view: status },
-         { new: true } 
+         { new: true, runValidators: true } 
        );
    
        if (!projectStatus) {
@@ -63,6 +76,9 @@ exports.completedProject = async(req,res)=>{
        });
    } catch (error) {
     console.log(error);
-      res.status(401).json({message:"Something went wrong"})
+    if(error.name === 'ValidationError'){
+        return res.status(400).json({message:"Invalid status value"});
+    }
+      res.status(500).json({message:"Something went wrong"})
    }
 }

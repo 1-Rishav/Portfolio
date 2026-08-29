@@ -1,4 +1,3 @@
-const Contact = require('../models/contact');
 const ContactModel = require('../models/contact');
 
 
@@ -10,7 +9,10 @@ exports.contactPage = async(req,res)=>{
       
       return res.status(200).json({message:'Connection sent successfully'})
    } catch (error) {
-      return res.status(401).json({message:"Something went wrong!"})
+      if(error.name === 'ValidationError'){
+          return res.status(400).json({message:error.message});
+      }
+      return res.status(500).json({message:"Something went wrong!"})
    }
 }
 
@@ -19,7 +21,7 @@ try {
    const user = await ContactModel.find();
    return res.status(200).json({message:"Connection retrieve successfully",user})
 } catch (error) {
-   return res.status(401).json({message:"Can't fetch data"})
+   return res.status(500).json({message:"Can't fetch data"})
 }
 }
 
@@ -29,7 +31,7 @@ exports.connected = async(req,res)=>{
       const updatedUser = await ContactModel.findByIdAndUpdate(
          id,
          { view: status },
-         { new: true } 
+         { new: true, runValidators: true } 
        );
    
        if (!updatedUser) {
@@ -41,6 +43,9 @@ exports.connected = async(req,res)=>{
          
        });
    } catch (error) {
-      res.status(401).json({message:"Something went wrong"})
+      if(error.name === 'ValidationError'){
+          return res.status(400).json({message:"Invalid status value"});
+      }
+      res.status(500).json({message:"Something went wrong"})
    }
 }
