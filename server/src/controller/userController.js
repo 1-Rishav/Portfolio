@@ -44,6 +44,15 @@ module.exports.registerUser = async(req,res,next)=>{
         if(error.name === 'ValidationError'){
             return res.status(400).json({message:error.message});
         }
+        if(error.code === 11000){
+            // The findOne check above already covers the normal case; this
+            // only fires if two registrations for the same email land at
+            // almost the same moment and both pass that check before either
+            // write finishes. The unique index is what actually stops the
+            // second one - this just turns that into the same clean 409
+            // used above, instead of a generic 500.
+            return res.status(409).json({message:"User already exist"});
+        }
         return res.status(500).json({message:"Something went wrong"})
     }
 }
@@ -118,6 +127,14 @@ module.exports.googleAuth = async(req,res)=>{
         const token = user.generateAuthToken();
         return res.cookie("token",token,{...cookieOptions, maxAge:COOKIE_MAX_AGE}).status(200).json({message:"LoggedIn successfully",role:user.role,firstName:user.firstName,email:user.email})
     } catch (error) {
+        if(error.code === 11000){
+            // Two sign-in attempts for the same brand-new email arrived at
+            // almost the same moment and both passed the findOne check above
+            // before either create() finished - the unique index is what
+            // catches the second one now. Rare, and simply retrying (the
+            // account now exists) succeeds normally.
+            return res.status(409).json({message:"An account with this email already exists. Please try signing in again."});
+        }
         console.log(error)
         return res.status(401).json({message:"Google sign-in failed. Please try again."})
     }

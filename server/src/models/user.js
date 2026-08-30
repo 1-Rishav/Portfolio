@@ -15,7 +15,19 @@ const userSchema = new mongoose.Schema({
         default:"user"
     },
     email: {
-        type: String, required: [true, 'Email is required'], validate: {
+        type: String,
+        required: [true, 'Email is required'],
+        // unique + lowercase + trim together close the duplicate-account
+        // race: unique enforces it at the database level (catching two
+        // near-simultaneous registrations that both pass registerUser's
+        // findOne check before either write completes), while lowercase +
+        // trim normalize "User@x.com" / " user@x.com " to the same stored
+        // value first - without that, the index alone would still let
+        // case- or whitespace-variant duplicates through.
+        unique: true,
+        lowercase: true,
+        trim: true,
+        validate: {
             validator: function (email) {
                 return String(email)
                     .toLowerCase()
