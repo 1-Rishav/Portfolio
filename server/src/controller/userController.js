@@ -2,13 +2,19 @@ const User =require('../models/user')
 const { OAuth2Client } = require('google-auth-library')
 
 // Shared cookie attributes for setting AND clearing the session cookie.
-// NOTE: maxAge is intentionally left exactly as it was (a separate, already-flagged
-// issue) - not touched here to keep this change scoped to auth protection only.
 const cookieOptions = {
     httpOnly:true,
     secure:true,
     sameSite:"None",
 }
+
+// Matches the JWT's own expiresIn: "1y" - previously this was
+// 360000 * 24 * 60 * 60 * 1000 (~986 years), almost certainly a typo where
+// an extra "00" ended up in front of the intended day count. Keeping the
+// cookie's lifetime aligned with the token's own expiry means neither
+// outlives the other: the cookie won't disappear while the token is still
+// valid, and it won't linger for centuries after the token itself expires.
+const COOKIE_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
 
 // Verifies Google ID tokens server-side. Constructing this doesn't require
 // GOOGLE_CLIENT_ID to be set yet - it only matters once a token is actually
@@ -33,7 +39,7 @@ module.exports.registerUser = async(req,res,next)=>{
         })
 
         const token = user.generateAuthToken();
-        return res.cookie("token" , token , {...cookieOptions, maxAge:360000 * 24 * 60 * 60 * 1000}).status(200).json({message:"User registered successfully",role:user.role,firstName:user.firstName,email:user.email})
+        return res.cookie("token" , token , {...cookieOptions, maxAge:COOKIE_MAX_AGE}).status(200).json({message:"User registered successfully",role:user.role,firstName:user.firstName,email:user.email})
     } catch (error) {
         if(error.name === 'ValidationError'){
             return res.status(400).json({message:error.message});
@@ -60,7 +66,7 @@ module.exports.loginUser = async(req,res,next)=>{
             return res.status(401).json({message:"Invalid email or password"})
         }
         const token = user.generateAuthToken();
-        return res.cookie("token",token,{...cookieOptions, maxAge:360000*24*60*60*1000}).status(200).json({message:"LoggedIn successfully",role:user.role,firstName:user.firstName,email:user.email})
+        return res.cookie("token",token,{...cookieOptions, maxAge:COOKIE_MAX_AGE}).status(200).json({message:"LoggedIn successfully",role:user.role,firstName:user.firstName,email:user.email})
     } catch (error) {
         console.log(error)
         return res.status(500).json({message:"Something went wrong"})
@@ -110,7 +116,7 @@ module.exports.googleAuth = async(req,res)=>{
         }
 
         const token = user.generateAuthToken();
-        return res.cookie("token",token,{...cookieOptions, maxAge:360000*24*60*60*1000}).status(200).json({message:"LoggedIn successfully",role:user.role,firstName:user.firstName,email:user.email})
+        return res.cookie("token",token,{...cookieOptions, maxAge:COOKIE_MAX_AGE}).status(200).json({message:"LoggedIn successfully",role:user.role,firstName:user.firstName,email:user.email})
     } catch (error) {
         console.log(error)
         return res.status(401).json({message:"Google sign-in failed. Please try again."})
