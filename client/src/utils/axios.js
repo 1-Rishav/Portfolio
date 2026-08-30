@@ -11,7 +11,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://portfolio-0nkn.on
 const axiosInstance = axios.create({baseURL: BASE_URL, withCredentials: true})
 
 axiosInstance.interceptors.response.use((response) => response,
-(error)=>Promise.reject((error.response && error.response.data))
+(error)=>Promise.reject(error.response ? error.response.data : { message: 'Network error. Please check your connection and try again.' })
 )
 
 export default axiosInstance;

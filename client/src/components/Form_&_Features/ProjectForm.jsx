@@ -26,21 +26,27 @@ function ProjectForm({file , setFileValue}) {
         [name]:e.target.value
       }
   })
-
-  const isNameValid = enteredValue.name.trim().length > 0;
-  const isEmailValid = enteredValue.email.includes('@');
-  const isPhoneValid = enteredValue.phone.trim().length >= 10;
-  const isTypeValid = enteredValue.type.trim().length >= 4;
-  const isDescribeValid = enteredValue.describe.trim().length >= 10;
-
-  // Check if all fields are valid
-  if (isNameValid && isEmailValid && isPhoneValid && isTypeValid && isDescribeValid) {
-    setError(false); // No errors
-  } else {
-    setError(true); // Errors exist
   }
 
-  }  
+  // Recomputes whenever EITHER the text fields OR the selected file changes -
+  // previously this lived inline inside handleChange, so it only ever
+  // re-ran on a keystroke and never reacted to file selection at all. That's
+  // why a file could be entirely unselected and the submit button would
+  // still be enabled, sending a request the backend has to reject.
+  useEffect(() => {
+    const isNameValid = enteredValue.name.trim().length > 0;
+    const isEmailValid = enteredValue.email.includes('@');
+    const isPhoneValid = enteredValue.phone.trim().length >= 10;
+    const isTypeValid = enteredValue.type.trim().length >= 4;
+    const isDescribeValid = enteredValue.describe.trim().length >= 10;
+    const isFileValid = Boolean(file);
+
+    if (isNameValid && isEmailValid && isPhoneValid && isTypeValid && isDescribeValid && isFileValid) {
+      setError(false); // No errors
+    } else {
+      setError(true); // Errors exist
+    }
+  }, [enteredValue, file]);
 
   const handleSubmit= async()=>{
 
