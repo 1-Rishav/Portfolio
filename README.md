@@ -162,3 +162,39 @@ Worked through the user's list of 7 items in order of increasing risk: contained
 - Image/bundle size optimization
 - `/404` route doesn't exist (wildcard redirect target is itself unmatched)
 - ESLint cleanup (pre-existing prop-types/unused-import patterns - confirmed again this session that nothing new was added to this pile)
+
+### Session 6 — 6 tracked items: 3 already fixed (verified, not redone), 3 genuinely new
+
+Before touching anything, checked the actual current state of all 6 against the sandbox - several of these read as duplicates of earlier sessions' work, and I didn't want to either waste effort redoing something already done or, worse, assume something was fixed when it wasn't.
+
+**Already fixed in earlier sessions - verified again here, no changes made:**
+- **Item 2** (`/project/checkStatus`, `/contact/checkConnection` unauthenticated) - this was the centerpiece of Session 2's admin-protection work. Confirmed both routes still carry `verifyToken,requireAdmin`.
+- **Item 6** (`runValidators` missing) - this was literally the previous session (Session 5). Confirmed `runValidators: true` is present on both `findByIdAndUpdate` calls.
+- **Item 4, backend half** (`req.file.originalname` read before the null check) - fixed in Session 4. Confirmed the check still runs first, outside and before the try block.
+
+**Genuinely new work this session:**
+
+**1. No SEO/meta tags**
+- [x] `index.html`: proper `<title>`, meta description, `theme-color`, canonical link (pointing at the custom domain, `www.rajrishav.co.in`, since the CORS config lists both that and the `.vercel.app` deployment URL - canonical tells search engines which one is authoritative), full Open Graph set (title/description/type/url/image/site_name), and Twitter Card tags.
+- [x] Added `robots.txt` (allow all, points to the sitemap) and a `sitemap.xml` covering the genuinely public content routes - deliberately left out `/admin/*` (private) and the mobile-only concatenated `/highlights`/`/services` views (they duplicate content already covered by the desktop-oriented pages, so including both risks looking like duplicate content to a crawler).
+- Note: this covers the static, site-wide tags the flaw actually named. Per-route dynamic meta tags (a different `<title>`/description per page) would need something like `react-helmet-async` - a separate, larger addition not implied by what was asked, so left alone.
+- Used the actual custom domain and X handle for these tags rather than leaving them generic - worth a quick check that both are still current before this goes live.
+
+**3. Cookie `maxAge` (~986 years)**
+- [x] Was `360000 * 24 * 60 * 60 * 1000` in three places (register, login, and Google auth - the Google one didn't exist yet when this bug was first flagged). Replaced all three with one shared `COOKIE_MAX_AGE = 365 * 24 * 60 * 60 * 1000` constant, matching the JWT's own `expiresIn: "1y"` so neither the cookie nor the token outlives the other. Verified against the actual HTTP response, not just the constant in isolation: the real `Set-Cookie` header now shows `Max-Age=31536000` and an `Expires` date exactly one year out.
+
+**4. `ProjectForm.jsx`, frontend half - submit button ignores file selection**
+- [x] The validity check lived inline inside `handleChange`, so it only ever recomputed on a keystroke and had no way to react to file selection at all (a separate prop). Extracted it into a `useEffect` watching `[enteredValue, file]`, and added the missing `isFileValid` check. This also gave the file's already-imported-but-unused `useEffect` an actual job - confirmed via lint that it's no longer flagged unused, and no `exhaustive-deps` warning fired, meaning the dependency array is complete.
+
+**5. Axios interceptor swallows network errors as `undefined`**
+- [x] `Promise.reject(error.response && error.response.data)` produced `undefined` on any request with no response at all (e.g. a network failure) - the exact scenario this app's own Render-cold-start keep-alive hack in `index.js` exists to reduce. Any catch block doing `toast.error(error.message)` without optional chaining (both `ContactForm.jsx` and `ProjectForm.jsx` do this) would then throw a second, uncaught error trying to read `.message` off `undefined`. Fixed at the source instead of patching every consumer: the interceptor now always rejects with an object that has a `.message`, falling back to a clear "Network error" message when there's no server response to read from. This one change covers every current and future consumer of the shared axios instance.
+
+**Verification this session:** full client build (meta tags and `robots.txt`/`sitemap.xml` confirmed present in `dist/`), lint diff on every touched file (net *improvement* - one less pre-existing issue, zero new ones), backend syntax check, and a real HTTP request/response round-trip confirming the actual `Set-Cookie` header rather than just trusting the constant.
+
+**Explicitly still out of scope** (unchanged - not touched this session):
+- 4 missing video files in `public/ProjectVideos/`
+- Missing `nodemon` dependency (`npm start` fails)
+- Image/bundle size optimization
+- `/404` route doesn't exist (wildcard redirect target is itself unmatched)
+- ESLint cleanup (pre-existing prop-types/unused-import patterns)
+- Per-route dynamic meta tags (would need `react-helmet-async` or similar - a separate addition, not part of the static-tags gap that was actually flagged)
