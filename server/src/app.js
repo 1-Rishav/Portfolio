@@ -10,6 +10,17 @@ const cookieParser = require("cookie-parser")
 
 const app = express();
 
+// Render sits in front of this app as a single reverse proxy, and always
+// appends the real client IP as the only/first entry in X-Forwarded-For.
+// "1" tells Express to trust exactly that one hop - req.ip becomes the
+// address Render itself appended, which a client cannot forge - rather
+// than either the default `false` (req.ip is just Render's own IP for
+// every request) or `true` (trusts the entire header, letting a client
+// prepend arbitrary fake IPs). This is also what express-rate-limit needs
+// to key its per-IP buckets correctly instead of throwing
+// ERR_ERL_UNEXPECTED_X_FORWARDED_FOR on every request.
+app.set('trust proxy', 1);
+
 app.use( cors({
     origin: ["https://rishav-labs.vercel.app","https://www.rajrishav.co.in"]    /*  process.env.FRONTEND_URL */,
     methods:['GET','POST','DELETE','PUT','PATCH'],
