@@ -49,7 +49,7 @@ const { isLoggedIn } = useSelector(state => state.auth);
                         </div>
                       </div>
              <Separator className='mt-20'/>
-             <ProjectForm file={fileData} setFileValue={setFileValue}/>
+             <ProjectForm file={fileData} setFileValue={setFileValue} clearFile={() => setFileData(null)}/>
              </div>
              <Separator/>
 

@@ -6,7 +6,7 @@ import axios from "../../utils/axios";
 import { toast } from "react-toastify";
 import LoadingScreen from "../LoadingScreen";
 
-function ProjectForm({file , setFileValue}) {
+function ProjectForm({file , setFileValue, clearFile}) {
   const [enteredValue , setEnteredValue] =useState({
     name:'',
     email:'',
@@ -78,7 +78,10 @@ if (file) {
       type:'',
       describe:''
       })
-    setFileValue(true)
+    setFileValue(true) // resets the visual dropzone preview
+    clearFile?.() // actually clears the retained file too - previously only
+                  // the line above ran, so the old File object stuck around
+                  // and could get silently resubmitted on the next attempt
     setError(true);
     
   }
