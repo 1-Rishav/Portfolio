@@ -34,13 +34,25 @@ const AccountMenu = ({ onRequestLogin, onAfterLogout, className = "" }) => {
         setOpen(false);
       }
     };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setOpen(false);
+    };
     document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [open]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setOpen(false);
-    dispatch(LogOut());
+    // LogOut is an async thunk that awaits POST auth/logout before Redux
+    // state actually updates - awaiting it here means onAfterLogout (which
+    // often navigates) only fires once the logged-out state is real, rather
+    // than a moment before it, which could briefly render the old logged-in
+    // UI at the destination.
+    await dispatch(LogOut());
     onAfterLogout?.();
   };
 
