@@ -2,21 +2,9 @@ import {Suspense,lazy} from "react";
 import {Navigate , useRoutes} from 'react-router-dom'
 
 import NavLayout from '../layout/navLayout'
-
-import Mern_Highlights from '../pages/ScreenNav/Mern_HighlightsPage'
-import Pern_Highlights from '../pages/ScreenNav/Pern_HighlightsPage'
-import Develop_Service from '../pages/ScreenNav/Develop_ServicePage'
-import Design_Service from '../pages/ScreenNav/DesignServicePage'
-import AssignProject from '../pages/ScreenNav/AssignProjectPage'
-import About from '../pages/ScreenNav/AboutPage'
-import Contact from '../pages/ScreenNav/ContactPage'
-import Labs from '../pages/ScreenNav/LabsPage'
-import Mobile_Highlights from '../pages/MobileNav/HighlightsPage'
-import Mobile_Service from '../pages/MobileNav/ServicesPage';
 import LoadingHome from '../components/Form_&_Features/LoadingHome'
 import AdminLayout from "../layout/adminLayout";
-import AssignedProjects from "../pages/AdminNav/AssignedProjectsPage";
-import Connections from "../pages/AdminNav/ConnectionsPage";
+
 const Loadable = (Component) => (props) => {
     return (
       <Suspense fallback={<LoadingHome/>}>
@@ -42,6 +30,7 @@ export default function Router(){
                 {path: 'assign-project',element:<AssignProject/>},
                 {path: 'highlights',element:<Mobile_Highlights/>},
                 {path: 'services',element:<Mobile_Service/>},
+                {path: '404',element:<NotFound/>},
                 { path: "*", element: <Navigate to="/404" replace /> }
             ]
         },
@@ -60,6 +49,21 @@ export default function Router(){
     ])
 }
 
-const Main = Loadable(
-    lazy(()=> import ("../pages/main/Main"))
-)
+// Every page-level route is code-split (lazy-loaded) so the initial bundle
+// only ships what a given page actually needs, instead of all 14 at once.
+// NavLayout/AdminLayout stay eager above since they're the immediate chrome
+// every route needs regardless of which page loads inside it.
+const Main = Loadable(lazy(()=> import ("../pages/main/Main")))
+const Mern_Highlights = Loadable(lazy(()=> import('../pages/ScreenNav/Mern_HighlightsPage')))
+const Pern_Highlights = Loadable(lazy(()=> import('../pages/ScreenNav/Pern_HighlightsPage')))
+const Develop_Service = Loadable(lazy(()=> import('../pages/ScreenNav/Develop_ServicePage')))
+const Design_Service = Loadable(lazy(()=> import('../pages/ScreenNav/DesignServicePage')))
+const AssignProject = Loadable(lazy(()=> import('../pages/ScreenNav/AssignProjectPage')))
+const About = Loadable(lazy(()=> import('../pages/ScreenNav/AboutPage')))
+const Contact = Loadable(lazy(()=> import('../pages/ScreenNav/ContactPage')))
+const Labs = Loadable(lazy(()=> import('../pages/ScreenNav/LabsPage')))
+const Mobile_Highlights = Loadable(lazy(()=> import('../pages/MobileNav/HighlightsPage')))
+const Mobile_Service = Loadable(lazy(()=> import('../pages/MobileNav/ServicesPage')))
+const NotFound = Loadable(lazy(()=> import('../pages/NotFoundPage')))
+const AssignedProjects = Loadable(lazy(()=> import('../pages/AdminNav/AssignedProjectsPage')))
+const Connections = Loadable(lazy(()=> import('../pages/AdminNav/ConnectionsPage')))
