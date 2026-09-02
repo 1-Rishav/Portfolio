@@ -36,11 +36,66 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
   // measured from the actual rendered container to stay responsive across
   // phone-width screens instead of overflowing or looking tiny.
   const googleBtnWrapRef = useRef(null)
+  const panelRef = useRef(null)
   const [googleBtnWidth, setGoogleBtnWidth] = useState(320)
 
   useEffect(() => {
     if (isOpen && googleBtnWrapRef.current) {
       setGoogleBtnWidth(googleBtnWrapRef.current.offsetWidth)
+    }
+  }, [isOpen, mode])
+
+  // Focus management: moves focus into the modal on open (or when switching
+  // between login/signup), traps Tab/Shift+Tab within it while open, wires
+  // Escape to the same close path as the X button and backdrop click, and
+  // restores focus to whatever triggered the modal once it closes. Keyed on
+  // [isOpen, mode] only (matching the effect above) so it reacts to the
+  // modal opening or switching forms, not to every keystroke in the fields
+  // below - depending on handleClose/resetFields directly would re-run this
+  // (and re-steal focus to the first field) on every render, including ones
+  // triggered by typing.
+  useEffect(() => {
+    if (!isOpen) return
+
+    const previouslyFocused = document.activeElement
+
+    const getFocusable = () =>
+      Array.from(
+        panelRef.current?.querySelectorAll(
+          'input, button, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      )
+
+    getFocusable()[0]?.focus()
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (allowClose) {
+          resetFields()
+          onClose?.()
+        }
+        return
+      }
+
+      if (e.key !== 'Tab') return
+      const nodes = getFocusable()
+      if (nodes.length === 0) return
+      const first = nodes[0]
+      const last = nodes[nodes.length - 1]
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocused?.focus?.()
     }
   }, [isOpen, mode])
 
@@ -117,6 +172,10 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md px-4 py-8 overflow-y-auto"
       >
         <motion.div
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-modal-title"
           initial={{ opacity: 0, scale: 0.92, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.92, y: 16 }}
@@ -135,7 +194,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
             </button>
           )}
 
-          <h3 className="text-2xl sm:text-3xl font-semibold text-black dark:text-white mb-1 pr-8">
+          <h3 id="auth-modal-title" className="text-2xl sm:text-3xl font-semibold text-black dark:text-white mb-1 pr-8">
             {title || (mode === 'login' ? 'Welcome back' : 'Create an account')}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
