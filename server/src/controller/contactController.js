@@ -5,7 +5,7 @@ const ContactModel = require('../models/contact');
 exports.contactPage = async(req,res)=>{
    const {name,email,phone,type,describe}=req.body;
    try {
-      const contactData = await ContactModel.create({name:name,email:email,phone:phone,business:type,describe:describe})
+      await ContactModel.create({name:name,email:email,phone:phone,business:type,describe:describe})
       
       return res.status(200).json({message:'Connection sent successfully'})
    } catch (error) {
@@ -20,7 +20,7 @@ exports.allConnection = async(req,res)=>{
 try {
    const user = await ContactModel.find();
    return res.status(200).json({message:"Connection retrieve successfully",user})
-} catch (error) {
+} catch {
    return res.status(500).json({message:"Can't fetch data"})
 }
 }
@@ -45,6 +45,12 @@ exports.connected = async(req,res)=>{
    } catch (error) {
       if(error.name === 'ValidationError'){
           return res.status(400).json({message:"Invalid status value"});
+      }
+      if(error.name === 'CastError'){
+          // Same gap as projectController's completedProject: a malformed
+          // id throws CastError before validation ever runs, so it needs
+          // its own check to get a 400 instead of the generic 500 below.
+          return res.status(400).json({message:"Invalid contact id"});
       }
       res.status(500).json({message:"Something went wrong"})
    }

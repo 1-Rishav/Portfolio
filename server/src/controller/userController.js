@@ -22,7 +22,7 @@ const COOKIE_MAX_AGE = 365 * 24 * 60 * 60 * 1000;
 // rejected) rather than crashing the server on boot.
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-module.exports.registerUser = async(req,res,next)=>{
+module.exports.registerUser = async(req,res)=>{
     const {firstName , lastName , email,password}=req.body;
 
     try {
@@ -57,7 +57,7 @@ module.exports.registerUser = async(req,res,next)=>{
     }
 }
 
-module.exports.loginUser = async(req,res,next)=>{
+module.exports.loginUser = async(req,res)=>{
     const {email,password}=req.body;
 
     try {
@@ -157,7 +157,7 @@ module.exports.getCurrentUser = async(req,res)=>{
                 role:user.role
             }
         });
-    } catch (error) {
+    } catch {
         return res.status(500).json({message:"Something went wrong"});
     }
 }

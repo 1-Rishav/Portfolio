@@ -18,7 +18,7 @@ exports.verifyToken = async (req, res, next) => {
     let decoded;
     try {
         decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
+    } catch {
         return res.status(401).json({ message: 'Session expired, please log in again' });
     }
 
@@ -31,7 +31,7 @@ exports.verifyToken = async (req, res, next) => {
         }
         req.user = { _id: user._id, role: user.role };
         next();
-    } catch (error) {
+    } catch {
         // A genuine DB error is a different problem than an expired session,
         // so it gets its own message rather than reusing the one above.
         return res.status(500).json({ message: 'Something went wrong, please try again' });

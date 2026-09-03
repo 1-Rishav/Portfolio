@@ -52,7 +52,7 @@ exports.allAssignedProject = async(req,res)=>{
   try {
     const projects = await ProjectModel.find();
     return res.status(200).json({message:'All projects fetched successfully',projects})
-  } catch (error) {
+  } catch {
     return res.status(500).json({message:"Can't fetch projects"})
   }
 }
@@ -78,6 +78,13 @@ exports.completedProject = async(req,res)=>{
     console.log(error);
     if(error.name === 'ValidationError'){
         return res.status(400).json({message:"Invalid status value"});
+    }
+    if(error.name === 'CastError'){
+        // A malformed id (not a valid ObjectId) never reaches the
+        // ValidationError check above - Mongoose rejects it earlier, before
+        // validation runs - so it needs its own check to get a 400 instead
+        // of falling through to the generic 500 below.
+        return res.status(400).json({message:"Invalid project id"});
     }
       res.status(500).json({message:"Something went wrong"})
    }
