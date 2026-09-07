@@ -233,7 +233,15 @@ export const Card = ({
       layoutId={layout ? `card-${card.title}` : undefined}
       onClick={handleOpen}
       className="rounded-3xl bg-gray-100 dark:bg-neutral-900 h-80 w-56 md:h-[24rem] md:w-96 overflow-hidden flex flex-col items-start justify-start relative z-10">
-         <FollowerPointerCard>
+         {/* FollowerPointerCard now wraps the image too (previously it only
+             wrapped the small text block below). This button is a flex
+             column with items-start, so a child with no explicit size
+             shrinks to fit its own in-flow content - the text block, in
+             this case - which is exactly why the custom-cursor hover zone
+             (and the mouse-position tracking used to place it) only ever
+             covered that small area instead of the full card. w-full h-full
+             makes it actually fill the button. */}
+         <FollowerPointerCard className="w-full h-full">
           
       <div
         className="absolute h-full  top-0 inset-x-0 bg-gradient-to-b from-black/50 via-transparent to-transparent z-30 pointer-events-none" />
@@ -250,14 +258,13 @@ export const Card = ({
           {card.title}
         </motion.p>
       </div>
-      
-      </FollowerPointerCard>
       <BlurImage
       
         src={card.src}
         alt={card.title}
         fill
         className="object-cover absolute z-10 inset-0 h-[60vh]" />
+      </FollowerPointerCard>
        
     </motion.button>
     
