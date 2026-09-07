@@ -6,7 +6,17 @@ export function BackgroundBeamsWithCollisionDemo() {
   return (
     (<BackgroundBeamsWithCollision>
       <div className="w-full h-full flex items-center justify-center">
-        <div className="w-full h-full grid lg:grid-cols-[25rem,auto,22rem] md:grid-cols-[18rem,auto,16rem] grid-cols-[4rem,auto,0] grid-rows-[15rem,12rem,14rem,3rem] md:grid-rows-[5rem,auto,3rem] lg:grid-rows-[5rem,auto,3rem]">
+        <div
+  className="w-full h-full
+    grid
+    lg:grid-cols-[25rem_auto_22rem]
+    md:grid-cols-[18rem_auto_16rem]
+    grid-cols-[4rem_auto_0]
+    grid-rows-[12rem_12rem_14rem_3rem]
+    md:grid-rows-[5rem_auto_3rem]
+    lg:grid-rows-[5rem_auto_3rem]
+  "
+>
           <div className="bg-white rounded-br-3xl row-start-1 col-start-1"><FloatingDockDemo /></div>
           <div className=" md:row-start2 md:col-end-2 ">
             <div className="h-full w-full list-none flex flex-wrap items-center justify-center gap-2 text-white text-gradient cursor-pointer text-3xl font-bold">
@@ -40,7 +50,7 @@ export function BackgroundBeamsWithCollisionDemo() {
               <li>AnadamNagar Mahalaxmi PG <br /> Ramapuram, Chennai</li>
             </div>
           </div>
-          <a href="#" className="flex items-center justify-center bg-white rounded-tl-full md:row-start-3 md:col-start-3 row-start-4 col-start-2 cursor-pointer text-xl font-semibold"   ><div className="text-xs | lg:text-base">
+          <a href="#" className="max-w-fit p-4 flex items-center justify-center bg-white rounded-tl-full md:row-start-3 md:col-start-3 row-start-4 col-start-2 justify-self-end cursor-pointer text-xl font-semibold"   ><div className="text-xs | lg:text-base">
             Gone too far, send me back up</div><div className=" animate-bounce">
               👆</div></a>
         </div>
