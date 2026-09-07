@@ -13,9 +13,9 @@ const AdminLayout = () => {
     }
 
   return (
-    <>
+    <div className="overflow-x-clip">
     <Outlet/>
-    </>
+    </div>
   )
 }
 

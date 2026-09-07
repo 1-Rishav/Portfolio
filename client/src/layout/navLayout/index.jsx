@@ -47,7 +47,7 @@ const UserLayout = () => {
   return (
     <>
     <LoadingBar loading={loading} />
-    <div>
+    <div className="overflow-x-clip">
         <Outlet />
       </div>
     </>
