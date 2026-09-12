@@ -50,9 +50,6 @@ export function BackgroundBeamsWithCollisionDemo() {
               <li>AnadamNagar Mahalaxmi PG <br /> Ramapuram, Chennai</li>
             </div>
           </div>
-          <a href="#" className="max-w-fit p-4 flex items-center justify-center bg-white rounded-tl-full md:row-start-3 md:col-start-3 row-start-4 col-start-2 justify-self-end cursor-pointer text-xl font-semibold"   ><div className="text-xs | lg:text-base">
-            Gone too far, send me back up</div><div className=" animate-bounce">
-              👆</div></a>
         </div>
       </div>
 
