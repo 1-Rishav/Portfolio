@@ -106,7 +106,7 @@
 }
 
 .curve_one, .curve_two{
-    width: calc(var(--card-size) * 0.05);
+    width: calc(var(--card-size) * 0);
     height: calc(var(--card-size) * 0.05);
     content:"";
     position: absolute;
