@@ -22,7 +22,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use( cors({
-    origin: ["https://rishav-labs.vercel.app","https://www.rajrishav.co.in"]    /*  process.env.FRONTEND_URL */,
+    origin: ["https://rishav-labs.vercel.app", "https://www.rajrishav.co.in", process.env.FRONTEND_URL].filter(Boolean),
     methods:['GET','POST','DELETE','PUT','PATCH'],
     credentials:true,
 }))
