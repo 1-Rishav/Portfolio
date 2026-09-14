@@ -1,4 +1,3 @@
-import React from 'react'
 import ContactForm from '../Form_&_Features/ContactForm'
 import {Separator} from '@/components/ui/separator'
 import FAQ from '../Form_&_Features/FAQ'

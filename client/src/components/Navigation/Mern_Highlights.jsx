@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import { Separator } from "@/components/ui/separator"
 import HighlightDesign from '../Form_&_Features/HighlightDesign'
 import { mernTechStacks } from '../Data/TechStackData'
@@ -6,7 +6,6 @@ import HighlightImages from '../Form_&_Features/HighlightImages'
 import { mernHighlight } from '../Data/HighlightData'
 import FeatureComponent from '../Form_&_Features/FeatureComponent'
 import images from '../../assets/index'
-import { FollowerPointerCard, FollowPointer } from '../ui/Follower_Pointer'
 
 function Mern_Highlights() {
 

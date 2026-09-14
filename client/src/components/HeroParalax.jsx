@@ -1,5 +1,4 @@
 "use client";
-import React, { useState } from "react";
 import { HeroParallax } from "../components/ui/hero_paralax";
 import images from '../assets/index'
 

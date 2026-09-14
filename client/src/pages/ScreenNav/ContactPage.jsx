@@ -1,4 +1,3 @@
-import React from 'react'
 import Contact from '../../components/Navigation/Contact'
 import { BackgroundBeamsWithCollisionDemo } from '../../components/Footer_BeamsCollision'
 import { NavbarDemo } from '../../components/Floating_Nav'

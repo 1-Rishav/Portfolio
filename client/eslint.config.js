@@ -35,4 +35,13 @@ export default [
       ],
     },
   },
+  {
+    // Build/tooling config files run under Node (via Vite/Tailwind's own
+    // config loaders), not the browser - so they legitimately use
+    // require/__dirname/module even though the rest of the app is ESM+browser.
+    files: ['*.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ]

@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import { HeroParallaxDemo } from '../../components/HeroParalax';
 import { TimelineDemo } from '../../components/TimeLineData';
 import { AppleCardsCarouselDemo } from '../../components/Carousel';

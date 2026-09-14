@@ -1,4 +1,3 @@
-import React from "react";
 import { FloatingDock } from "../components/ui/float_dock";
 import { FaGithub,FaXTwitter  } from "react-icons/fa6";
 import { SiStandardresume } from "react-icons/si";
@@ -37,7 +36,7 @@ export function FloatingDockDemo() {
     },
   ];
   return (
-    (<div className="flex items-center justify-center h-fit md:h-[5rem] w-full">
+    (<div className="flex items-center justify-center h-fit w-fit md:h-[5rem] md:w-full">
       <FloatingDock
         // only for demo, remove for production
         //mobileClassName="translate-y-20"

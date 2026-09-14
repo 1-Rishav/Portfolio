@@ -1,4 +1,3 @@
-import React from 'react'
 import Mern_Highlights from '../Navigation/Mern_Highlights'
 import Pern_Highlights from '../Navigation/Pern_Highlights'
 

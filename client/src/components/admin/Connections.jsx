@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import { MeteorsDemo } from '../Meteor_Box'
 import axios from '../../utils/axios';
 import { toast } from 'react-toastify';

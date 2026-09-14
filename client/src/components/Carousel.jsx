@@ -1,6 +1,5 @@
 "use client";
 //import img from "next/img";
-import React from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";

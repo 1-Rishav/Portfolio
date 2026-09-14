@@ -1,11 +1,8 @@
-import React from "react";
 import { Timeline } from "./ui/timeline";
 import { FollowerPointerCard } from "./ui/Follower_Pointer";
-import { Link } from 'react-router-dom'
 import { CardSpotlight } from "./ui/card_spotlight";
-import { Boxes } from "./ui/background_boxes";
 import images from '../assets/index'
-export function TimelineDemo({ topRef }) {
+export function TimelineDemo() {
 
   const data = [
     {

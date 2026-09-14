@@ -1,7 +1,7 @@
 "use client";
 
 import { useMotionValue, motion, useMotionTemplate } from "framer-motion";
-import React, { useState } from "react";
+import { useState } from "react";
 import { CanvasRevealEffect } from "./card_reveal_effect";
 import { cn } from "@/lib/utils";
 

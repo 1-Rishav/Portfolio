@@ -1,4 +1,3 @@
-import React from 'react'
 import Design_Service from '../../components/Navigation/Design_Service'
 import { BackgroundBeamsWithCollisionDemo } from '../../components/Footer_BeamsCollision'
 import { NavbarDemo } from '../../components/Floating_Nav'

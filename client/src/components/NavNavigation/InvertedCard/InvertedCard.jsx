@@ -1,6 +1,4 @@
-import React from 'react'
 import style from './Inverted.module.css'
-import images from '../../../assets/index'
 const InvertedCard = ({site,img}) => {
   return (
     <>

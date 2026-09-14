@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import HighlightDesign from '../Form_&_Features/HighlightDesign'
 import HighlightImages from '../Form_&_Features/HighlightImages'
 import { pernTechStack } from '../Data/TechStackData'

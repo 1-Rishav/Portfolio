@@ -1,6 +1,6 @@
 import { Input } from "@heroui/input";
 import { Textarea } from "@heroui/input";
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react';
 import { GoArrowUpRight } from "react-icons/go";
 import axios from "../../utils/axios";
 import { toast } from "react-toastify";
