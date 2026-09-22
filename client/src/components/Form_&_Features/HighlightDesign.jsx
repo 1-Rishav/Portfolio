@@ -1,4 +1,5 @@
-import React from 'react'
+
+import PropTypes from 'prop-types';
 
 function HighlightDesign({heading,subheading,image,end,webUrl,gitUrl}) {
   return (
@@ -50,5 +51,14 @@ function HighlightDesign({heading,subheading,image,end,webUrl,gitUrl}) {
           </div>
   )
 }
+
+HighlightDesign.propTypes = {
+  heading: PropTypes.node,
+  subheading: PropTypes.node,
+  image: PropTypes.string,
+  end: PropTypes.node,
+  webUrl: PropTypes.string,
+  gitUrl: PropTypes.string,
+};
 
 export default HighlightDesign

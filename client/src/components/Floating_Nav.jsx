@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -8,14 +8,14 @@ import {
 } from "framer-motion";
 import { GoArrowUpRight } from "react-icons/go";
 
-import { cn } from "@/lib/utils";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { AiOutlineClose } from "react-icons/ai";
 import images from '../assets/index'
 import {useSelector} from 'react-redux'
 import AuthModal from "./auth/AuthModal";
 import AccountMenu from "./auth/AccountMenu";
+import PropTypes from "prop-types";
 
 const transition = {
   type: "spring",
@@ -61,6 +61,13 @@ const MenuItem = ({ setActive, active, item, children, ...props }) => {
   );
 };
 
+MenuItem.propTypes = {
+  setActive: PropTypes.func,
+  active: PropTypes.node,
+  item: PropTypes.node,
+  children: PropTypes.node,
+};
+
 const Menu = ({ setActive, children }) => {
   return (
     <nav
@@ -70,6 +77,11 @@ const Menu = ({ setActive, children }) => {
       {children}
     </nav>
   );
+};
+
+Menu.propTypes = {
+  setActive: PropTypes.func,
+  children: PropTypes.node,
 };
 
 
@@ -91,6 +103,13 @@ const ProductItem = ({ title, description, href, src }) => {
       </div>
     </Link>
   );
+};
+
+ProductItem.propTypes = {
+  title: PropTypes.string,
+  description: PropTypes.string,
+  href: PropTypes.string,
+  src: PropTypes.string,
 };
 export const NavbarDemo = () => {
   const { scrollYProgress } = useScroll();
@@ -145,11 +164,11 @@ export const NavbarDemo = () => {
           <Menu setActive={setActive} >
             {role==="admin" ? (
               <>
-              <button onClick={() => navigate('/admin/connections')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+              <button onClick={() => navigate('/admin/connections')} onMouseEnter={() => setActive(null)} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               Connections
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
-              <button onClick={() => navigate('/admin/assignedProjects')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+              <button onClick={() => navigate('/admin/assignedProjects')} onMouseEnter={() => setActive(null)} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               AssignedProjects
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
@@ -193,18 +212,18 @@ export const NavbarDemo = () => {
               </div>
             </MenuItem>
 
-            <button onClick={() => navigate('/about')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+            <button onClick={() => navigate('/about')} onMouseEnter={() => setActive(null)} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               About
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
 
 
 
-            <button onClick={()=>navigate('/contact')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+            <button onClick={()=>navigate('/contact')} onMouseEnter={() => setActive(null)} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               Contact
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>
-            <button onClick={()=>navigate('/tech_lab')} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
+            <button onClick={()=>navigate('/tech_lab')} onMouseEnter={() => setActive(null)} className="relative cursor-pointer max-sm:px-5 max-sm:text-5xl max-sm:font-semibold text-xl font-semibold text-black hover:opacity-[0.9] dark:text-white group">
               Labs
               <span className="absolute left-0 bottom-0 h-[2px] w-0 bg-black dark:bg-white transition-all duration-1000 sm:group-hover:w-full"></span>
             </button>

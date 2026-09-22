@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Meteors } from "./ui/box_effect";
 import { MdPictureAsPdf } from "react-icons/md";
 import { RiCheckDoubleFill } from "react-icons/ri";
 import axios from "../utils/axios";
 import { toast } from "react-toastify";
+import PropTypes from "prop-types";
 
 
 export function MeteorAssignedProject({name , number , company , email , description,file,id,checked}) {
@@ -66,3 +67,14 @@ export function MeteorAssignedProject({name , number , company , email , descrip
     </div>
   );
 }
+
+MeteorAssignedProject.propTypes = {
+  name: PropTypes.string,
+  number: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  company: PropTypes.string,
+  email: PropTypes.string,
+  description: PropTypes.string,
+  file: PropTypes.string,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  checked: PropTypes.string,
+};

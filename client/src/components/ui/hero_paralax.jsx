@@ -1,6 +1,14 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
+const productShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  title: PropTypes.string,
+  link: PropTypes.string,
+  thumbnail: PropTypes.string,
+});
 
 export const HeroParallax = ({ products }) => {
   const firstRow = products.slice(0, 5);
@@ -60,6 +68,10 @@ export const HeroParallax = ({ products }) => {
   );
 };
 
+HeroParallax.propTypes = {
+  products: PropTypes.arrayOf(productShape),
+};
+
 export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto pt-20 md:pt-24 px-4 w-full left-0 ">
@@ -67,7 +79,7 @@ export const Header = () => {
        <span className='text-3xl md:text-8xl font-bold text-emerald-500'>Hi,</span>  Its <br /> Rishav Raj
       </h1>
       <p className="max-w-2xl text-base md:text-2xl font-semibold mt-8 dark:text-neutral-200">
-      A passionate and detail-oriented web developer specializing in crafting high-quality digital solutions. With expertise in the MERN and PERN stack, I build seamless web applications that combine functionality with great design. I'm here to bring your ideas to life with clean, efficient, and innovative web solutions <span className='text-2xl md:text-4xl text-emerald-600'>.</span>
+      A passionate and detail-oriented web developer specializing in crafting high-quality digital solutions. With expertise in the MERN and PERN stack, I build seamless web applications that combine functionality with great design. I&apos;m here to bring your ideas to life with clean, efficient, and innovative web solutions <span className='text-2xl md:text-4xl text-emerald-600'>.</span>
       </p>
       
     </div>
@@ -105,4 +117,9 @@ export const ProductCard = ({ product, translate }) => {
       </h2>
     </motion.div>
   );
+};
+
+ProductCard.propTypes = {
+  product: productShape,
+  translate: PropTypes.object,
 };

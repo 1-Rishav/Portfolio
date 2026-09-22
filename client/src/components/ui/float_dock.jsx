@@ -5,11 +5,16 @@
  **/
 
 import { cn } from "@/lib/utils";
-import { TbLayoutNavbarCollapseFilled } from "react-icons/tb";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import {Link} from "react-router-dom";
 import { useRef, useState } from "react";
+import PropTypes from "prop-types";
+
+const dockItemShape = PropTypes.shape({
+  title: PropTypes.string,
+  href: PropTypes.string,
+  icon: PropTypes.node,
+});
 
 export const FloatingDock = ({
   items,
@@ -22,11 +27,16 @@ export const FloatingDock = ({
    </>);
 };
 
+FloatingDock.propTypes = {
+  items: PropTypes.arrayOf(dockItemShape),
+  desktopClassName: PropTypes.string,
+  mobileClassName: PropTypes.string,
+};
+
 const FloatingDockMobile = ({
   items,
   className
 }) => {
-  const [open, setOpen] = useState(false);
   return (
     (<div className={cn("relative block md:hidden", className)}>
       <AnimatePresence>
@@ -74,6 +84,11 @@ const FloatingDockMobile = ({
   );
 };
 
+FloatingDockMobile.propTypes = {
+  items: PropTypes.arrayOf(dockItemShape),
+  className: PropTypes.string,
+};
+
 const FloatingDockDesktop = ({
   items,
   className
@@ -92,6 +107,11 @@ const FloatingDockDesktop = ({
       ))}
     </motion.div>)
   );
+};
+
+FloatingDockDesktop.propTypes = {
+  items: PropTypes.arrayOf(dockItemShape),
+  className: PropTypes.string,
 };
 
 function IconContainer({
@@ -166,3 +186,10 @@ function IconContainer({
     </a>)
   );
 }
+
+IconContainer.propTypes = {
+  mouseX: PropTypes.object,
+  title: PropTypes.string,
+  icon: PropTypes.node,
+  href: PropTypes.string,
+};

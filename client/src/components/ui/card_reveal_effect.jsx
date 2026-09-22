@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import React, { useMemo, useRef } from "react";
 import * as THREE from "three";
+import PropTypes from "prop-types";
 
 export const CanvasRevealEffect = ({
   animationSpeed = 0.4,
@@ -34,6 +35,15 @@ export const CanvasRevealEffect = ({
       )}
     </div>)
   );
+};
+
+CanvasRevealEffect.propTypes = {
+  animationSpeed: PropTypes.number,
+  opacities: PropTypes.arrayOf(PropTypes.number),
+  colors: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+  containerClassName: PropTypes.string,
+  dotSize: PropTypes.number,
+  showGradient: PropTypes.bool,
 };
 
 const DotMatrix = ({
@@ -153,6 +163,15 @@ const DotMatrix = ({
   );
 };
 
+DotMatrix.propTypes = {
+  colors: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)),
+  opacities: PropTypes.arrayOf(PropTypes.number),
+  totalSize: PropTypes.number,
+  dotSize: PropTypes.number,
+  shader: PropTypes.string,
+  center: PropTypes.arrayOf(PropTypes.string),
+};
+
 const ShaderMaterial = ({
   source,
   uniforms,
@@ -255,10 +274,22 @@ const ShaderMaterial = ({
   );
 };
 
+ShaderMaterial.propTypes = {
+  source: PropTypes.string,
+  uniforms: PropTypes.object,
+  maxFps: PropTypes.number,
+};
+
 const Shader = ({ source, uniforms, maxFps = 60 }) => {
   return (
     (<Canvas className="absolute inset-0  h-full w-full">
       <ShaderMaterial source={source} uniforms={uniforms} maxFps={maxFps} />
     </Canvas>)
   );
+};
+
+Shader.propTypes = {
+  source: PropTypes.string,
+  uniforms: PropTypes.object,
+  maxFps: PropTypes.number,
 };

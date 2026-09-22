@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Meteors } from "./ui/box_effect";
 import { RiCheckDoubleFill } from "react-icons/ri";
 import axios from "../utils/axios";
 import { toast } from "react-toastify";
+import PropTypes from "prop-types";
 
 
 export function MeteorsDemo({name , number , company , email , description,id,checked}) {
@@ -62,3 +63,13 @@ export function MeteorsDemo({name , number , company , email , description,id,ch
     </div>
   );
 }
+
+MeteorsDemo.propTypes = {
+  name: PropTypes.string,
+  number: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  company: PropTypes.string,
+  email: PropTypes.string,
+  description: PropTypes.string,
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  checked: PropTypes.string,
+};

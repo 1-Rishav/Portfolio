@@ -1,6 +1,6 @@
 import React from 'react'
 
-const LoadingBar = ({ loading }) => {
+const LoadingBar = ({ loading = true }) => {
   return (
     loading && (
       <div className="fixed top-0 left-0 w-full h-1 bg-transparent z-50">

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { motion, AnimatePresence, useMotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
+import PropTypes from "prop-types";
 
 export const FollowerPointerCard = ({
   children,
@@ -54,6 +55,12 @@ export const FollowerPointerCard = ({
       {children}
     </div>)
   );
+};
+
+FollowerPointerCard.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+  title: PropTypes.node,
 };
 
 export const FollowPointer = ({

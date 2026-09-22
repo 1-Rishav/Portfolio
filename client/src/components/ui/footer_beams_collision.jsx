@@ -2,6 +2,7 @@
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useRef, useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -90,7 +91,12 @@ export const BackgroundBeamsWithCollision = ({
   );
 };
 
-const CollisionMechanism = React.forwardRef(({ parentRef, containerRef, beamOptions = {} }, ref) => {
+BackgroundBeamsWithCollision.propTypes = {
+  children: PropTypes.node,
+  className: PropTypes.string,
+};
+
+const CollisionMechanism = React.forwardRef(({ parentRef, containerRef, beamOptions = {} }) => {
   const beamRef = useRef(null);
   const [collision, setCollision] = useState({
     detected: false,
@@ -192,6 +198,22 @@ const CollisionMechanism = React.forwardRef(({ parentRef, containerRef, beamOpti
 
 CollisionMechanism.displayName = "CollisionMechanism";
 
+CollisionMechanism.propTypes = {
+  parentRef: PropTypes.object,
+  containerRef: PropTypes.object,
+  beamOptions: PropTypes.shape({
+    initialX: PropTypes.number,
+    translateX: PropTypes.number,
+    initialY: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    translateY: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    rotate: PropTypes.number,
+    duration: PropTypes.number,
+    delay: PropTypes.number,
+    repeatDelay: PropTypes.number,
+    className: PropTypes.string,
+  }),
+};
+
 const Explosion = ({
   ...props
 }) => {
@@ -225,4 +247,8 @@ const Explosion = ({
       ))}
     </div>)
   );
+};
+
+Explosion.propTypes = {
+  className: PropTypes.string,
 };
