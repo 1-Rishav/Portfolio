@@ -15,6 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 //import img from "next/img";
 import { useOutsideClick } from "../../hooks/use_outside_click";
 import { FollowerPointerCard } from "./Follower_Pointer";
+import PropTypes from "prop-types";
 
 export const CarouselContext = createContext({
   onCardClose: () => {},
@@ -150,6 +151,11 @@ export const Carousel = ({
   );
 };
 
+Carousel.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.node),
+  initialScroll: PropTypes.number,
+};
+
 export const Card = ({
   card,
   index,
@@ -157,7 +163,7 @@ export const Card = ({
 }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
-  const { onCardClose, currentIndex } = useContext(CarouselContext);
+  const { onCardClose } = useContext(CarouselContext);
 
   
 
@@ -271,6 +277,17 @@ export const Card = ({
   </>);
 };
 
+Card.propTypes = {
+  card: PropTypes.shape({
+    title: PropTypes.string,
+    category: PropTypes.string,
+    content: PropTypes.node,
+    src: PropTypes.string,
+  }).isRequired,
+  index: PropTypes.number,
+  layout: PropTypes.bool,
+};
+
 export const BlurImage = ({
   height,
   width,
@@ -296,4 +313,12 @@ export const BlurImage = ({
       {...rest} />)
       
   );
+};
+
+BlurImage.propTypes = {
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  src: PropTypes.string,
+  className: PropTypes.string,
+  alt: PropTypes.string,
 };

@@ -1,8 +1,7 @@
 
-import {  Navigate, Outlet,useLocation  } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import LoadingBar from "../../components/Form_&_Features/LoadingBar";
-import { useSelector } from "react-redux";
 //import { useSelector } from "react-redux";
 
 
@@ -14,7 +13,6 @@ const UserLayout = () => {
   useEffect(() => {
     const handlePopState = () => {
       // Predict if user is going back to "/"
-      const nextUrl = document.referrer; // doesn't always work reliably, so:
       const path = window.location.pathname;
       if (path === '/') {
         setLoading(true);
