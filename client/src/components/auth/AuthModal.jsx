@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { GoogleLogin } from '@react-oauth/google'
 import { LoginUser, RegisterUser, GoogleAuth } from '../../store/slices/authSlice'
 import LoadingScreen from '../LoadingScreen'
+import PropTypes from 'prop-types'
 
 // Only defined once a real Google Cloud OAuth Client ID is added to the
 // client .env (VITE_GOOGLE_CLIENT_ID). Until then this is undefined and the
@@ -317,6 +318,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess, allowClose = true, title, subti
       </motion.div>
     </AnimatePresence>
   )
+}
+
+AuthModal.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  onSuccess: PropTypes.func,
+  allowClose: PropTypes.bool,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
 }
 
 export default AuthModal
