@@ -13,7 +13,7 @@ function NotFound() {
         Page not found
       </h1>
       <p className='text-base | lg:text-lg text-gray-600 dark:text-grayDark-200 font-sans-primary max-w-md mb-10'>
-        The page you're looking for doesn't exist or may have moved.
+        The page you&apos;re looking for doesn&apos;t exist or may have moved.
       </p>
       <Link
         to='/'

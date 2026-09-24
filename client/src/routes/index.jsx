@@ -2,16 +2,19 @@ import {Suspense,lazy} from "react";
 import {Navigate , useRoutes} from 'react-router-dom'
 
 import NavLayout from '../layout/navLayout'
-import LoadingHome from '../components/Form_&_Features/LoadingHome'
+import LoadingBar from '../components/Form_&_Features/LoadingBar'
 import AdminLayout from "../layout/adminLayout";
 
-const Loadable = (Component) => (props) => {
+const Loadable = (Component) => {
+  function LoadableComponent(props) {
     return (
-      <Suspense fallback={<LoadingHome/>}>
+      <Suspense fallback={<LoadingBar/>}>
         <Component {...props} />
       </Suspense>
     );
-  };
+  }
+  return LoadableComponent;
+};
 export default function Router(){
     return useRoutes([
         {
