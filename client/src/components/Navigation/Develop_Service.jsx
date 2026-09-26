@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useLayoutEffect, useEffect, useRef, useState } from 'react'
 import { Separator } from '@/components/ui/separator'
 import { gsap } from 'gsap'
 import { develop, support } from '../Data/Develop_DesignData'
@@ -6,11 +6,7 @@ import CustomImages from '../Form_&_Features/CustomImages'
 import FeatureComponent from '../Form_&_Features/FeatureComponent'
 import images from '../../assets/index'
 
-function Develop_Service() {
-  const carouselRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-    
-  const DevelopImages=[
+const DevelopImages=[
    images.Project1_i,
    images.Project2,
    images.GemX_Logo,
@@ -35,6 +31,11 @@ function Develop_Service() {
         images.Gem5,
         images.Quick5,
       ];
+
+function Develop_Service() {
+  const carouselRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+const firstSetRef = useRef(null);
     
       // ✅ Change Image in Every 3 Seconds
       useEffect(() => {
@@ -46,66 +47,35 @@ function Develop_Service() {
         return () => clearInterval(interval);
       }, []);
 
-  // useEffect(() => {
-  //   const carousel = carouselRef.current;
+      useLayoutEffect(() => {
+  const track = carouselRef.current;
+  const firstSet = firstSetRef.current;
 
-  //   if (carousel) {
-  //     // Clone carousel items to create the looping effect
-  //     const items = Array.from(carousel.children);
-  //     items.forEach((item) => {
-  //       const clone = item.cloneNode(true);
-  //       carousel.appendChild(clone); // Add clone to the end
-  //     });
+  if (!track || !firstSet) return;
 
-  //     const totalWidth = carousel.scrollWidth / 2; // Half width for the original set
+  const ctx = gsap.context(() => {
+    const distance = firstSet.getBoundingClientRect().width;
 
-  //     // GSAP infinite scrolling animation
-  //     gsap.to(carousel, {
-  //       x: `-${totalWidth}px`, // Move to the left by the width of the original set
-  //       duration: 80, // Adjust speed
-  //       repeat: -1, // Infinite loop
-  //       ease: "linear", // Smooth motion
-  //       modifiers: {
-  //         x: (x) => (parseFloat(x) % totalWidth) + "px", // Reset position when reaching the end
-  //       },
-  //     });
-  //   }
-  // }, []);
+    if (distance <= 0) return;
 
+    const speed = 50;
 
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    const images = Array.from(carousel.children);
-    const imageWidth = images[0].offsetWidth;
+    gsap.to(track, {
+      x: -distance,
+      duration: distance / speed,
+      ease: 'none',
+      repeat: -1,
 
-    // GSAP Timeline for Smooth Movement
-    const timeline = gsap.timeline({
-      repeat: -1, // Infinite loop
-      defaults: { ease: "linear", duration: 5 }, // Smooth and consistent speed
-    });
-
-    timeline.to(carousel, {
-      x: `-=${imageWidth}`, // Move carousel to the right
-      onComplete: () => {
-        // Clone the first image instead of moving it
-        const firstImage = carousel.firstElementChild;
-        const cloneFirstImage = firstImage.cloneNode(true);
-
-        // Append the cloned image to the end
-        carousel.appendChild(cloneFirstImage);
-
-        // Remove the original first image
-        firstImage.remove();
-
-        // Reset position to avoid jump
-        gsap.set(carousel, { x: `+=${imageWidth}` });
+      modifiers: {
+        x: gsap.utils.unitize(
+          gsap.utils.wrap(-distance, 0)
+        ),
       },
     });
+  }, track);
 
-    return () => {
-      timeline.kill(); // Cleanup GSAP animation on unmount
-    };
-  }, []);
+  return () => ctx.revert();
+}, []);
 
   return (
     <>
@@ -159,22 +129,54 @@ function Develop_Service() {
         </div>
       </div> */}
 
-<div className='w-full  h-full px-2 | lg:px-3 | xl:px-4 flex  items-center justify-center overflow-hidden overflow-x-scroll whitespace-nowrap scroll-smooth [scrollbar-width:none]'>
-        <div className='px-2 | sm:px-4 | xl:px-10 | 2xl:px-16 | 3xl:px-32 | 4xl:px-40 overflow-hidden '>
+<div className="w-full px-2 lg:px-3 xl:px-4 flex items-center justify-center overflow-hidden">
+  <div className="px-2 sm:px-4 xl:px-10 2xl:px-16 3xl:px-32 4xl:px-40 w-full overflow-hidden">
 
-          <div className=' overflow-hidden  my-10 | lg:my-16 | 2xl:my-20 | 4xl:my-24 py-10 | lg:py-14 | 2xl:py-24 | 4xl:py-32 rounded-2xl | px-2 lg:rounded-3xl w-full  h-full flex gap-10 flex-col items-center justify-center bg-black'>
-           
-            <div className=' overflow-hidden  transform-gpu  | dark:bg-grayDark-500 h-[50%] flex  gap-5 items-center justify-center '>
+    <div
+      className="
+        my-10
+        lg:my-16
+        2xl:my-20
+        4xl:my-24
+        py-10
+        lg:py-14
+        2xl:py-24
+        4xl:py-32
+        rounded-2xl
+        lg:rounded-3xl
+        w-full
+        overflow-hidden
+        bg-black
+      "
+    >
 
-              <div ref={carouselRef} style={{ display: "flex", willChange: "transform" }} className=' h-40  flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
+      <div
+        ref={carouselRef}
+        className="flex w-max items-center will-change-transform"
+      >
 
-                <CustomImages images={DevelopImages} />
+        {/* First copy */}
+        <div
+          ref={firstSetRef}
+          className="flex shrink-0 gap-7 pr-5"
+        >
+          <CustomImages images={DevelopImages} />
+        </div>
 
-              </div>
-            </div>
-            </div>
-            </div>
-            </div>
+        {/* Second copy */}
+        <div
+          className="flex shrink-0 gap-7 pr-5"
+          aria-hidden="true"
+        >
+          <CustomImages images={DevelopImages} />
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
       <Separator className='mt-8' />
     </>
   )
