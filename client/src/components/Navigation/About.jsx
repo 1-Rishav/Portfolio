@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import  { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import CustomImages from '../Form_&_Features/CustomImages';
 import { Separator } from '@/components/ui/separator'
@@ -9,6 +9,8 @@ function About() {
 
   const carouselRight = useRef(null);
   const carouselLeft = useRef(null);
+  const carouselRightSet = useRef(null);
+const carouselLeftSet = useRef(null);
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -42,112 +44,131 @@ function About() {
     images.Explore9,
     images.Explore10,
   ]
-
-  // useEffect(() => {
-  //   const carousel = carouselRight.current;
-  //   const images = Array.from(carousel.children);
-  //   const imageWidth = images[0].offsetWidth;
-
-  //   // GSAP Timeline for Smooth Movement
-  //   const timeline = gsap.timeline({
-  //     repeat: -1, // Infinite loop
-  //     defaults: { ease: "linear", duration: 3 }, // Smooth and consistent speed
-  //   });
-
-  //   timeline.to(carousel, {
-  //     x: `+=${imageWidth}`, // Move the carousel left by one image width
-  //     onComplete: () => {
-  //       // Reposition logic for smooth prepend
-  //       const firstImage = carousel.firstElementChild;
-  //       const lastImage = carousel.lastElementChild;
-
-  //       // Clone the last image to visually prepend it
-  //       const cloneLastImage = lastImage.cloneNode(true);
-  //       carousel.insertBefore(cloneLastImage, firstImage);
-
-  //       // Adjust carousel position to include the cloned image smoothly
-  //       gsap.set(carousel, { x: `+=${imageWidth}` });
-
-  //       // Remove the actual last image to avoid duplication
-  //       lastImage.remove();
-  //     },
-  //   });
-
-  //   return () => {
-  //     timeline.kill(); // Cleanup GSAP animation on unmount
-  //   };
-  // }, []);
-
-  useEffect(() => {
-      const carousel = carouselLeft.current;
-      const images = Array.from(carousel.children);
-      const imageWidth = images[0].offsetWidth;
   
-      // GSAP Timeline for Smooth Movement
-      const timeline = gsap.timeline({
-        repeat: -1, // Infinite loop
-        defaults: { ease: "linear", duration: 5 }, // Smooth and consistent speed
-      });
-  
-      timeline.to(carousel, {
-        x: `-=${imageWidth}`, // Move carousel to the right
-        onComplete: () => {
-          // Clone the first image instead of moving it
-          const firstImage = carousel.firstElementChild;
-          const cloneFirstImage = firstImage.cloneNode(true);
-  
-          // Append the cloned image to the end
-          carousel.appendChild(cloneFirstImage);
-  
-          // Remove the original first image
-          firstImage.remove();
-  
-          // Reset position to avoid jump
-          gsap.set(carousel, { x: `+=${imageWidth}` });
-        },
-      });
-  
-      return () => {
-        timeline.kill(); // Cleanup GSAP animation on unmount
-      };
-    }, []);
-  useEffect(() => {
-    const carousel = carouselRight.current;
-    const images = Array.from(carousel.children);
-    const imageWidth = images[0].offsetWidth;
+useLayoutEffect(() => {
+  const setupCarousel = (trackRef, firstSetRef, direction) => {
+    const track = trackRef.current;
+    const firstSet = firstSetRef.current;
 
-    // Set initial position to create space for smooth transition
-    gsap.set(carousel, { x: `-${imageWidth}px` });
+    if (!track || !firstSet) {
+      return () => {};
+    }
 
-    // GSAP Timeline for Smooth Movement
-    const timeline = gsap.timeline({
-      repeat: -1, // Infinite loop
-      defaults: { ease: "linear", duration: 5 }, // Smooth and consistent speed
+    let distance = 0;
+    let x = 0;
+
+    const speed = 50;
+
+    const setX = gsap.quickSetter(track, 'x', 'px');
+
+    const calculateDistance = () => {
+      const newDistance = firstSet.getBoundingClientRect().width;
+
+      if (newDistance <= 0) {
+        return;
+      }
+
+      if (distance > 0) {
+        /*
+         * Preserve the current position when the
+         * responsive width changes.
+         */
+        const progress =
+          direction === 'right'
+            ? (x + distance) / distance
+            : -x / distance;
+
+        distance = newDistance;
+
+        x =
+          direction === 'right'
+            ? -distance + progress * distance
+            : -progress * distance;
+      } else {
+        distance = newDistance;
+
+        /*
+         * LEFT → RIGHT
+         */
+        x =
+          direction === 'right'
+            ? -distance
+            : 0;
+      }
+
+      setX(x);
+    };
+
+    calculateDistance();
+
+    const resizeObserver = new ResizeObserver(() => {
+      calculateDistance();
     });
 
-    timeline.to(carousel, {
-      x: `+=${imageWidth}`, // Move carousel to the right
-      onComplete: () => {
-        // Clone the last image instead of moving it
-        const lastImage = carousel.lastElementChild;
-        const cloneLastImage = lastImage.cloneNode(true);
+    resizeObserver.observe(firstSet);
 
-        // Prepend the cloned image to the front
-        carousel.insertBefore(cloneLastImage, carousel.firstElementChild);
+    /*
+     * Truly continuous movement.
+     * No repeat tween.
+     * No cloneNode.
+     * No appendChild.
+     * No DOM mutation.
+     */
+    const ticker = (_, deltaTime) => {
+      if (distance <= 0) {
+        return;
+      }
 
-        // Instantly shift the position backward to maintain smoothness
-        gsap.set(carousel, { x: `-${imageWidth}px` });
+      const movement = (speed * deltaTime) / 1000;
 
-        // Remove the original last image to prevent duplication
-        lastImage.remove();
-      },
-    });
+      if (direction === 'right') {
+        /*
+         * LEFT → RIGHT
+         */
+        x += movement;
+
+        if (x >= 0) {
+          x -= distance;
+        }
+      } else {
+        /*
+         * RIGHT → LEFT
+         */
+        x -= movement;
+
+        if (x <= -distance) {
+          x += distance;
+        }
+      }
+
+      setX(x);
+    };
+
+    gsap.ticker.add(ticker);
 
     return () => {
-      timeline.kill(); // Cleanup GSAP animation on unmount
+      resizeObserver.disconnect();
+      gsap.ticker.remove(ticker);
     };
-  }, []);
+  };
 
+  const cleanupRight = setupCarousel(
+    carouselRight,
+    carouselRightSet,
+    'right'
+  );
+
+  const cleanupLeft = setupCarousel(
+    carouselLeft,
+    carouselLeftSet,
+    'left'
+  );
+
+  return () => {
+    cleanupRight();
+    cleanupLeft();
+  };
+}, []);
   
     useEffect(() => {
       const observer = new IntersectionObserver(
@@ -275,8 +296,20 @@ function About() {
 
       
       <Separator className="mt-14 " />
-      <div className='w-full min-h-screen h-full px-2 | lg:px-3 | xl:px-4 flex  items-center justify-center overflow-hidden overflow-x-scroll whitespace-nowrap scroll-smooth [scrollbar-width:none]'>
-        <div className='px-2 | sm:px-4 | xl:px-10 | 2xl:px-16 | 3xl:px-32 | 4xl:px-40 overflow-hidden '>
+<div
+  className="
+    w-full
+    min-h-screen
+    h-full
+    px-2
+    lg:px-3
+    xl:px-4
+    flex
+    items-center
+    justify-center
+    overflow-hidden
+  "
+>        <div className='px-2 | sm:px-4 | xl:px-10 | 2xl:px-16 | 3xl:px-32 | 4xl:px-40 overflow-hidden '>
 
           <div className=' overflow-hidden  my-10 | lg:my-16 | 2xl:my-20 | 4xl:my-24 py-20 | lg:py-24 | 2xl:py-32 | 4xl:py-40 rounded-2xl | px-2 lg:rounded-3xl w-full min-h-screen h-full flex gap-10 flex-col items-center justify-center bg-black'>
             <div className=' relative  pb-10 | lg:pb-16 |  flex flex-col items-center  justify-center xl:px-20 lg:px-14 md:px-10 max-md:px-5 h-full w-full'>
@@ -288,25 +321,83 @@ function About() {
               </div>
 
             </div>
-            <div className=' overflow-hidden  transform-gpu  | dark:bg-grayDark-500 h-[50%] flex  gap-5 items-center justify-center '>
+<div
+  className="
+    w-full
+    overflow-hidden
+    transform-gpu
+    h-[50%]
+    flex
+    items-center
+  "
+>
+              <div
+  ref={carouselRight}
+  className="
+    flex
+    w-max
+    shrink-0
+    items-center
+    will-change-transform
+  "
+>
+  {/* Duplicate copy comes FIRST */}
+  <div
+    className="flex shrink-0 gap-7 pr-7"
+    aria-hidden="true"
+  >
+    <CustomImages images={webImages} />
+  </div>
 
-              <div ref={carouselRight} style={{ display: "flex", willChange: "transform" }} className=' h-40  flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
-
-                <CustomImages images={webImages} />
-
-              </div>
+  {/* Original copy */}
+  <div
+    ref={carouselRightSet}
+    className="flex shrink-0 gap-7 pr-7"
+  >
+    <CustomImages images={webImages} />
+  </div>
+</div>
             </div>
             <div className='w-full pl-2 | max-sm:pl-5 | md:pl-10 | lg:pl-10 | xl:pl-20 | 4xl:pl-40 mt-5 inline-flex items-start justify-start relative group outline-none  | focus:outline-none '>
                 <a className="w-fit mt-5 inline-flex items-start justify-start relative group outline-none  | focus:outline-none "><div className="w-auto  bg-amber-400 inline-flex items-center justify-center relative leading-tight shadow-none overflow-hidden rounded-full border-default text-gray-600 py-2 px-5"><div className="md:text-xl font-bold relative inline-flex items-center justify-center top-px flex-shrink-0 bg-amber-400"><div>
                   Exploring</div></div></div><div className="md:text-xl font-bold bg-amber-400 flex-shrink-0 overflow-hidden flex items-center justify-center -ml-1 rounded-full transform transition-transform | md:w-11 md:h-11 | w-9 h-9 | xl:group-hover:translate-x-3  xl:group-hover:rotate-180 | js-button-icon"><GoArrowUpRight /></div></a>
               </div>
-            <div className=' overflow-hidden transform-gpu  | dark:bg-grayDark-500 h-[50%] flex   gap-5 items-center justify-center'>
+<div
+  className="
+    w-full
+    overflow-hidden
+    transform-gpu
+    h-[50%]
+    flex
+    items-center
+  "
+>
+              <div
+  ref={carouselLeft}
+  className="
+    flex
+    w-max
+    shrink-0
+    items-center
+    will-change-transform
+  "
+>
+  {/* Original copy */}
+  <div
+    ref={carouselLeftSet}
+    className="flex shrink-0 gap-7 pr-7"
+  >
+    <CustomImages images={Web3Images} />
+  </div>
 
-              <div ref={carouselLeft} style={{ display: "flex", willChange: "transform" }} className=' h-40 flex flex-shrink-0  items-center gap-7 overflow-x-auto '>
-
-                <CustomImages images={Web3Images} />
-
-              </div>
+  {/* Duplicate copy */}
+  <div
+    className="flex shrink-0 gap-7 pr-7"
+    aria-hidden="true"
+  >
+    <CustomImages images={Web3Images} />
+  </div>
+</div>
             </div>
           </div>
         </div>
