@@ -53,28 +53,45 @@ const firstSetRef = useRef(null);
 
   if (!track || !firstSet) return;
 
-  const ctx = gsap.context(() => {
-    const distance = firstSet.getBoundingClientRect().width;
+  // Pace of the loop in px per second - the same at every screen size.
+  const speed = 50;
 
-    if (distance <= 0) return;
+  // One loop = the distance from where copy 1 starts to where copy 2 starts,
+  // i.e. exactly copy 1's width (its right padding is the gap at the seam).
+  let distance = 0;
+  let tween = null;
 
-    const speed = 50;
+  const buildLoop = () => {
+    const nextDistance = firstSet.getBoundingClientRect().width;
 
-    gsap.to(track, {
-      x: -distance,
-      duration: distance / speed,
-      ease: 'none',
-      repeat: -1,
+    // Not laid out yet, or the width hasn't changed - nothing to rebuild.
+    if (nextDistance <= 0 || nextDistance === distance) return;
 
-      modifiers: {
-        x: gsap.utils.unitize(
-          gsap.utils.wrap(-distance, 0)
-        ),
-      },
-    });
-  }, track);
+    // The images change size at breakpoints (resize, zoom, rotating a tablet),
+    // so the loop length changes with them. Rebuild for the new length, but keep
+    // the strip at the same point in its loop so it doesn't jump.
+    const progress = tween ? tween.progress() : 0;
+    if (tween) tween.kill();
 
-  return () => ctx.revert();
+    distance = nextDistance;
+    tween = gsap.fromTo(
+      track,
+      { x: 0 },
+      { x: -distance, duration: distance / speed, ease: 'none', repeat: -1 }
+    );
+    tween.progress(progress);
+  };
+
+  buildLoop();
+
+  // Re-measure whenever the first copy changes size.
+  const resizeObserver = new ResizeObserver(buildLoop);
+  resizeObserver.observe(firstSet);
+
+  return () => {
+    resizeObserver.disconnect();
+    if (tween) tween.kill();
+  };
 }, []);
 
   return (
@@ -158,14 +175,14 @@ const firstSetRef = useRef(null);
         {/* First copy */}
         <div
           ref={firstSetRef}
-          className="flex shrink-0 gap-7 pr-5"
+          className="flex shrink-0 gap-7 pr-7"
         >
           <CustomImages images={DevelopImages} />
         </div>
 
         {/* Second copy */}
         <div
-          className="flex shrink-0 gap-7 pr-5"
+          className="flex shrink-0 gap-7 pr-7"
           aria-hidden="true"
         >
           <CustomImages images={DevelopImages} />
