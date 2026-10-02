@@ -32,12 +32,10 @@ function FeatureComponent({ heading, subheading, service, end }) {
             <div className="relative  flex flex-col w-full h-full">
               <div className=''>
                 {service.map((tech) => (
-                  <>
-                    <div key={tech.id} className=' transition-transform delay-100 tracking-normal hover:max-sm:text-xl text-base font-serif hover:text-2xl group'>
-                      <a href="" className={`group  `}><span className='text-base text-center p-4'>{`0${tech.id}`}</span>  {tech.service ?? tech.feature}</a>
-                      <Separator className='my-3 ml-5 w-full group-hover:bg-black      hover:transition duration-700 delay-150' />
-                    </div>
-                  </>
+                  <div key={tech.id} className=' transition-transform delay-100 tracking-normal hover:max-sm:text-xl text-base font-serif hover:text-2xl group'>
+                    <span className='text-base text-center p-4'>{`0${tech.id}`}</span>  {tech.service ?? tech.feature}
+                    <Separator className='my-3 ml-5 w-full group-hover:bg-black      hover:transition duration-700 delay-150' />
+                  </div>
                 ))}
 
               </div>
