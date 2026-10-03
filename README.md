@@ -364,3 +364,32 @@ Yoga isn't Chrome, so the specific "1200px" figure may not be the exact number a
 **Prop-types resume point:** unchanged from Session 8/9.
 
 **Next:** the user answers the `studio/` question above, then CMS Category 1, one category at a time, reporting before the next.
+
+### Session 14 — CMS Category 1 (Infrastructure & Wiring): Studio scaffold, browser client, env contract
+
+**Plan status reset:** `docs/CMS_INTEGRATION_PLAN.md` had marked Categories 1-2 as done for code that was never in the project (no `studio/`, no `sanityClient.js`, no schemas). Both were restarted from scratch and Category 2's statuses are back to not started. The plan now opens with *Architecture decisions* (11, settled from reading the client, the server and the SDK) that every later category follows - read them before touching CMS code.
+
+**Decisions that changed the plan, and why:**
+- **No Sanity client on the Express server (task 1.3 removed).** The server's `project` API is the "assign a project" intake (a visitor's request and PDF, stored in MongoDB/Cloudinary): personal data that stays there, not portfolio content. Nothing on the server reads or writes editorial content, and an Editor-access token on an internet-facing server would be the most damaging credential in the system for no benefit. The seed script (Category 5) gets its write token from `studio/.env` on the owner's machine.
+- **Content is read browser to Sanity's CDN directly**, never through the Render free-tier server (cold starts; it already self-pings every 14 minutes to stay awake).
+- **The official SDK is loaded lazily behind `fetchSanity()`.** Measured: `@sanity/client` is 40 KB gzipped, about +8 % on the 494 KB main chunk. The lazy design costs 4.4 KB on the critical path and downloads the SDK on first use. Consumers only ever see `fetchSanity` and `urlFor`, never the SDK.
+- **`autoUpdates: false`** in the Studio's CLI config: with it on, `sanity build` needs Sanity's API (fails offline) and the deployed Studio floats to whatever version Sanity serves; off means exactly what `package-lock.json` pins.
+
+**Built:**
+- `studio/` - Sanity Studio v6 as its own app (React 19, Node >= 22.12; the website is React 18) with a lockfile, an `env.js` shared by `sanity.cli.js` and `sanity.config.js` that stops with a readable message when the project id is missing or still the placeholder, an empty `schemaTypes/` ready for Category 2, a `.gitignore` for `.env*`, and a README with the owner's setup checklist.
+- `client/src/utils/sanityClient.js` - exports `isSanityConfigured`, `fetchSanity(query, params, { signal })` and `urlFor(image)`. Never throws at import and requests nothing until used; published perspective, CDN, 10 s timeout, API version pinned to `2026-05-04` (the one Studio 6.17 itself uses, so GROQ tried in Vision behaves the same). `urlFor` returns `null` (not an exception) for a missing, empty or malformed image. `client/package.json` and the lockfile gained two dependencies (+11 packages, purely additive, CRLF kept).
+- `client/.env.example` - the `VITE_SANITY_*` block (notes that Vite inlines them at build time, so Vercel needs them before the deploy that should use the CMS).
+- `docs/browser-tests/run_sanity_suite.sh` + `sanity_client_test.mjs` - the real-Chrome suite for the client module (see that folder's README).
+- Nothing imports `sanityClient.js` yet, so the live site is unchanged: the app build's main bundle is byte-identical to Session 13's (`Main-D18RDlKE.js`).
+
+**Verification:**
+- Studio: `npm ci` from the lockfile; `sanity build` with a valid-format id (about 10 s, offline); a missing id and the unedited `.env.example` placeholder are both refused with a readable message while `--version` and `login` still work; git ignores `.env*` and tracks `.env.example`; the built Studio boots in real Chrome and calls `https://<projectId>.api.sanity.io/v2026-05-04/...` with the id from `.env` (this sandbox's network blocks that call itself, so login and real content are the owner's check).
+- Client module, real Chrome, production builds, 40+ checks: unconfigured (id absent / placeholder / bad dataset) never throws, makes no request and warns correctly; configured, it sends exactly `GET abc12345.apicdn.sanity.io/v2026-05-04/data/query/production?...&perspective=published` with no auth header or cookies; the SDK is downloaded once, on first use; HTTP 404/500, a network failure (rejects after about 3 s), abort and the 10 s timeout all end as clean rejections and leave the client healthy; `urlFor` returns exact CDN urls and `null` for every unusable input; a failed SDK download rejects cleanly (Chrome then keeps failing that chunk until the page reloads, which is why callers fall back to built-in content).
+- Two things the suite caught: `urlFor` threw on a malformed asset reference (now resolved up front and returned as `null`), and the first test runner silently tested the wrong build because of a stale file server (the runners now give each scenario its own port and check what is being served).
+- Whole app: production build passes, lint 70 to 70 rule for rule. `diff -r` against the Session 13 zip shows only the files above; CRLF files kept CRLF, new files are LF; no `node_modules`, `dist` or `.env` inside the project; both lockfiles agree with their `package.json`.
+
+**Owner step still open - task 1.5:** `studio/README.md` has the checklist (log in, create the project with a public `production` dataset, put the project id into `studio/.env`, `client/.env` and Vercel's environment variables then redeploy, register the CORS origins with credentials off, `npm run dev`, then the two "is it wired up" checks). It cannot be run in this sandbox. Category 2 does not depend on it; Categories 3-5 do.
+
+**Still open from Session 13:** the Mern/Pern key warning, the `forwardRef` warning, the unused `Rishav2` / `Rishav4` images, the HeroUI CSS warnings, `server/.env` inside shared zips.
+
+**Next:** Category 2 - schema design, one document type at a time, validated offline with `sanity build` and the schema validator.
