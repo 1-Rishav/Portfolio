@@ -38,6 +38,25 @@ of a manual reload. This is a genuine bug, not a style question - the fix
 is a one-line addition to the effect's cleanup function, resetting overflow
 on unmount as well as on close.
 
+### 3. Footer's "About / Resume / FAQs / Contact" nav list has no real links
+`client/src/components/Footer_BeamsCollision.jsx` (the two footer nav
+columns: `About`, `Resume`, `FAQs`, `Contact` and `MERN Project`, `PERN
+Project`, `Web Design`, `Web Development`): every item is a plain `<li>`
+with no `href`, `onClick`, or router `Link` - styled as clickable
+(`cursor-pointer`) but functionally dead. Noticed while reading this file
+for the `siteSettings` schema (Category 2.6); the real resume and social
+links turned out to live in `Float_Icon.jsx`'s floating dock instead, not
+in this nav list.
+
+### 4. About page's "Exploring" button has no `href` at all
+`client/src/components/Navigation/About.jsx` (the amber "Exploring"
+button next to the web3 image ticker, around line 362): unlike the
+"Let's Connect" button right above it (which links to `/contact`), this
+`<a>` tag has no `href` attribute whatsoever - not even a placeholder
+`"#"`. Styled and sized identically to a working link, but clicking it
+does nothing. Noticed while reading this file for the `skillTickerItem`/
+`web3TickerItem` schemas (Category 2.4).
+
 ---
 
 ## Carried forward from earlier sessions (already logged in `README.md`, listed here only so this is a complete picture in one place)
