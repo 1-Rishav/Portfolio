@@ -393,3 +393,177 @@ Yoga isn't Chrome, so the specific "1200px" figure may not be the exact number a
 **Still open from Session 13:** the Mern/Pern key warning, the `forwardRef` warning, the unused `Rishav2` / `Rishav4` images, the HeroUI CSS warnings, `server/.env` inside shared zips.
 
 **Next:** Category 2 - schema design, one document type at a time, validated offline with `sanity build` and the schema validator.
+
+### Session 15 — CMS Category 2, task 2.6: `siteSettings` schema
+
+**First schema design task.** Before writing any fields, read the five pieces of current code Category 3 says `siteSettings` will replace, rather than trusting the plan's one-line descriptions: `About.jsx`, `Contact.jsx`, `Footer_BeamsCollision.jsx`, `Float_Icon.jsx`. Two things the plan's descriptions got wrong: the About "bio paragraph" is actually three separate paragraphs, not one; and the social links plus the resume link both live in `Float_Icon.jsx`'s `FloatingDockDemo` array, not the footer - the footer itself only has phone/email/address and a dead nav list (new finding, logged below).
+
+**Built:**
+- `studio/schemaTypes/documents/siteSettings.js` - the singleton document: `aboutBio` (portable text - Normal style only, `strong`/`em`/`underline` decorators, no lists or annotations, matching what the current copy actually uses), `contactHeading` (string, content only), `contactImage` (image, hotspot on, a *required* `alt` sub-field - the live `<img>` has `alt=""` today), `phone` (string), `email` (string, `.email()` validated), `address` (text, 2 rows, line breaks kept literally rather than a structured object), `socialLinks` (array of `socialLink`), `resumeUrl` (url - stays a link rather than a Sanity file asset; reasoning is in the schema file).
+- `studio/schemaTypes/objects/socialLink.js` - new reusable object, `platform` (closed list: the 3 live today - LinkedIn, GitHub, Twitter/X - plus Instagram/YouTube/Dribbble/Behance) + `url`. The icon itself stays a frontend asset (Sanity has no "pick a React component" field type); the frontend keeps one `platform -> icon` lookup when this is wired up in Category 3/4.
+- `studio/sanity.config.js` - the singleton pattern: a `SINGLETON_TYPES` set, a structure-pane entry that opens the fixed `siteSettings` document id directly instead of listing one, filtered out of the generic create-new list, duplicate/delete disabled for it.
+- `studio/schemaTypes/index.js`, plus `documents/` and `objects/` subfolders established now as the convention the other 9 schema types will follow.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, about 9 s, offline. `diff -r` against the uploaded zip - only the 4 files above changed; `client/` and `server/` untouched.
+
+**Not done in this task (by design, not oversight):** no content entered anywhere - no `siteSettings` document exists in any dataset yet (that's Category 5's seed script, or manual entry once 1.5 is done); fetching and rendering this data on the actual pages is Category 3's job, not this one.
+
+**New UI issue found, logged not fixed (UI_ISSUES_REPORT.md #3):** the footer's "About / Resume / FAQs / Contact" nav list - both columns - is plain `<li>` text with no `href` anywhere; styled as clickable but functionally dead.
+
+**Still open from Sessions 13-14:** the Mern/Pern key warning, the `forwardRef` warning, the unused `Rishav2` / `Rishav4` images, the HeroUI CSS warnings, `server/.env` inside shared zips, the shared-ticker-hook idea, task 1.5.
+
+**Next:** the user picks - continue Category 2 with another schema (2.1-2.5 or 2.7), or pause here. One schema at a time, per instruction.
+
+**Mid-session correction, before 2.1:** the user set an explicit content-vs-presentation rule - styled headings (h1/h2, eyebrow labels, decorative accents) are permanent and stay in code; only content that can plausibly change later (descriptions, links, images) becomes a schema field - and proposed a "common file" default-content pattern. Both written up as architecture decisions 12 and 13 rather than acted on immediately: 12 formalizes a rule already followed in 2.6 and now applied to 2.1 below; 13 belongs to Categories 3/4 (fetching/rendering), not schema design, so it is documented now and built when that category starts.
+
+### Session 15 (continued) — CMS Category 2, task 2.1: `heroProject`, `timelineProject`, `featuredProject`
+
+**Three schemas, one per Home page section**, each read from its real source: `HeroParalax.jsx`'s `products` array, `TimeLineData.jsx`'s `data` array, and `Carousel.jsx` + `ProjectDescription.jsx` together (the carousel's collapsed-card data and its expanded-card description live in two separate files today; the schema merges them into one document). Per architecture decision 12, each section's own heading stayed in its component rather than becoming a field: the hero's "Hi, Its Rishav Raj" + intro paragraph, the timeline's "My Tech Journey (2022-2025)" + intro paragraph, the carousel's "Projects That Define Me .".
+
+**The timeline's 4 current entries are not shaped alike** - 1 or 2 paragraphs, an image grid of 4, 2 or none, and the last entry (“GitHub, Vercel & Render”) is a checklist instead of images. Rather than copy that inconsistency into the schema, `timelineProject.description` is portable text that supports paragraphs and a bullet list, and `highlights` (the image grid) is simply allowed to be an empty array - so every current entry fits the same two fields with no special case, and a future entry is not locked into any one shape.
+
+**Built:**
+- `studio/schemaTypes/documents/heroProject.js` - `title`, `link` (optional - replaces today's `"#"` placeholder for photo-only cards), `thumbnail`, `displayOrder`.
+- `studio/schemaTypes/documents/timelineProject.js` - `title`, `description` (portable text: paragraphs + bullet list, no other formatting), `highlights` (array of `linkedImage`, may be empty), `displayOrder`.
+- `studio/schemaTypes/documents/featuredProject.js` - `category`, `title`, `cardImage`, `detailImage` (optional, falls back to `cardImage` - only GemX uses a genuinely different one today), `description`, `githubUrl` / `websiteUrl` (both optional, for a future project with no public repo or no live site), `displayOrder`.
+- `studio/schemaTypes/objects/linkedImage.js` - new reusable object (`image` + optional `link`), used by `timelineProject.highlights` today.
+- All three document types: a `displayOrder` number field (named to read cleanly in a GROQ `order()` clause, not shadow it) plus a matching Studio sort ordering, so the document list can be viewed in display order instead of last-edited order.
+- `studio/schemaTypes/index.js` updated to register all three documents and `linkedImage`.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 4 new files above changed; `client/` and `server/` untouched.
+
+**Not done in this task:** no content entered anywhere; fetching and rendering this data on the Home page is Category 3/4, not this one.
+
+**Next:** the user picks - continue Category 2 (2.2-2.5 or 2.7), or pause here.
+
+### Session 15 (continued) — CMS Category 2, task 2.2: `serviceGroup` (renamed from `serviceItem`), `serviceShowcaseProject`
+
+**Renamed `serviceItem` to `serviceGroup`, with reasoning, not silently.** `Develop_Service.jsx` and `Design_Service.jsx` each render exactly 2 service groups (Develop/Support; Design/Other) via one `<FeatureComponent heading= subheading= service={array} end= />` call per group. Heading, subheading, the service-name list, and even the trailing accent character travel together as one editorial unit - a flat "one document per individual service" design (closer to the plan's literal `serviceItem` name) would have left the heading/subheading with nowhere natural to live, and would mean querying and re-assembling 4 separate category labels to render what is already one coherent block in the component.
+
+**The subheading's trailing accent char is real content, not styling** - it looked exactly like the permanent heading accents left out in 2.1, but `FeatureComponent` takes it as an `end` prop rather than a hardcoded character, and it genuinely varies: Develop/Support/Design end in "." but Design's "Other" group ends in "!". Caught by reading `FeatureComponent.jsx` directly rather than assuming from the two call sites alone.
+
+**`serviceShowcaseProject` is one shared list, not two.** Develop's `DevelopImages` and Design's `ProjectImages` (the scrolling ribbon at the bottom of each page) turned out to be the exact same 12 images in the exact same order - genuinely one set of content shown on both pages, not two sets that happen to match. Modeled as a single list so it is edited once and shows in both places.
+
+**Built:**
+- `studio/schemaTypes/documents/serviceGroup.js` - `page` (develop/design), `heading`, `subheading`, `accentChar` (defaults to "." via `initialValue`), `services` (array of strings), `displayOrder`.
+- `studio/schemaTypes/documents/serviceShowcaseProject.js` - `image`, `displayOrder`. No title or link - neither is used by the live ribbon.
+- `studio/schemaTypes/index.js` updated to register both.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 2 new files above changed; `client/` and `server/` untouched.
+
+**Found, not built - proposed as new task 2.9 instead of scattered flags:** both service pages have hero-level media that fits neither schema here - Develop's rotating 8-image set, Design's autoplay video. Combined with 2.1's Home-hero-tagline flag into one proposed `pageHero` schema (one per page, just the hero-level intro content), since three separate one-off judgment calls are a pattern, not three unrelated edge cases. Not built - new scope outside what 2.1 and 2.2 were asked to cover.
+
+**Not done in this task:** no content entered anywhere; fetching and rendering this on the Develop/Design pages is Category 3/4, not this one.
+
+**Next:** the user picks - continue Category 2 (2.3-2.5, 2.7, or the new 2.9), or pause here.
+
+### Session 15 (continued) — CMS Category 2, task 2.3: `projectHighlight`
+
+**The schema Category 6 will eventually drive a single generic template from**, built by diffing `Mern_Highlights.jsx` against `Pern_Highlights.jsx` line for line rather than assuming either page's structure. Everything identical between the two pages (the "Design"/"Tech Stack" headings and their shared subheadings, the Highlights section's heading and ":" accent) stays out of the schema, per architecture decision 12 - only what genuinely differs became a field.
+
+**Two things only surfaced by reading the markup and `TechStackData.js` directly:**
+- The hero's project name has a real per-project text color (GemX blue, QuickFundz green) - unlike every other heading-adjacent accent left out so far, this one is a deliberate per-project choice, so it became a field (`titleColor`) rather than being left as permanent chrome.
+- That color, and every tech-stack badge's `color`, are closed lists of *keys* in the schema, not the raw Tailwind classes the current data stores (`"bg-blue-600"` etc.). Tailwind only generates CSS for class names it finds as literal text during its build scan - today's data works only because it sits in a `.js` file Tailwind reads. The moment this content moves to Sanity, a className built from the raw string at render time would silently stop working, with no error anywhere. The frontend keeps a small literal `{key: 'bg-blue-600', ...}` lookup when this is wired up (Category 3/4), the same pattern already used for `socialLink.platform`.
+
+**Also changed, not just migrated as-is:** `techStackItem.logo` is a Sanity image now, not the current hotlinked URL - today's logos point at Wikimedia, SendGrid, and Cloudinary's demo account, none of them under this project's control, and GemAPI's is a literal placeholder image rather than a real logo. `video` stays a URL field for now (matching 2.3's own note on file-size risk), but must hold a genuine absolute URL - the current relative `/ProjectVideos/...` path only resolves because it happens to be served from the site's own domain; migrating it means prefixing the full domain or wherever the video ends up hosted.
+
+**Built:**
+- `studio/schemaTypes/documents/projectHighlight.js` - 15 fields across 5 Studio tabs (hero/design/media/techStack/highlights, grouped given the field count): `title`, `slug` (for Category 6's `/highlights/:slug` route), `displayOrder`, `category`, `titleColor`, `tagline`, `missionStatement`, `logo`, `websiteUrl`, `githubUrl`, `video`, `leftGallery` + `rightGallery` (two independently-rotating image sets, matching `HighlightImages.jsx`'s actual `img2`/`img3` props exactly), `techStack`, `features`.
+- `studio/schemaTypes/objects/techStackItem.js` - new reusable object: `name`, `logo` (image), `link` (optional), `color` (closed list, see above).
+- `studio/schemaTypes/index.js` updated to register both.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings (caught and fixed two real mistakes first: a stray `#` in a comment block that would have been a syntax error, and an overly permissive URL validation that would have let a non-functional relative path through as valid). `npm ci && npx sanity build` - clean, offline. Re-verified a second time after a gap in this same session, from the plan doc and the files on disk rather than from memory of having done it, before writing this entry - still 0 errors, still builds clean. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 2 new files above changed; `client/` and `server/` untouched.
+
+**Not done in this task:** no content entered anywhere; the generic template, the `/highlights/:slug` route, and migrating GemX/QuickFundz's actual content are Category 6, not this task - this task only built what Category 6 will read.
+
+**Next:** the user picks - continue Category 2 (2.4, 2.5, 2.7, or the new 2.9), or pause here.
+
+### Session 15 (continued) — CMS Category 2, task 2.4: `skillTickerItem`, `web3TickerItem`
+
+**The simplest pair so far.** `About.jsx`'s `webImages` (12 images, the right-moving ticker under "Skill is Best Way to Know About.") and `Web3Images` (10 images, the left-moving "Exploring" ticker) are both pure image arrays - no title, no link - confirmed by reading `CustomImages.jsx` itself rather than assuming from the two call sites. Same shape as 2.2's `serviceShowcaseProject`.
+
+**Factored the duplication instead of copying it twice.** The two document types are structurally identical (`image` + `displayOrder`, nothing else), so the field/ordering/preview definitions moved into one shared `schemaTypes/shared/tickerImage.js` helper that both `skillTickerItem.js` and `web3TickerItem.js` spread into their own `defineType`. A future change to this shape (e.g. an optional caption) now only has to happen once. Kept as two separate document types rather than merged into one, unlike 2.2's showcase images - these are two genuinely different, non-overlapping image sets, not the same content shown twice, so merging them would have been the wrong call here even though the schema shape is identical.
+
+**Built:**
+- `studio/schemaTypes/shared/tickerImage.js` - new, the shared `tickerImageSchema()` factory (not a registered Sanity type itself, so it lives outside `documents/`/`objects/`).
+- `studio/schemaTypes/documents/skillTickerItem.js`, `documents/web3TickerItem.js` - each just a `defineType` wrapper spreading the shared shape in.
+- `studio/schemaTypes/index.js` updated to register both.
+
+**Left alone, per architecture decision 12 and the nav-link rule:** the "Skill is Best Way to Know About." heading, and the "Let's Connect" button beside the skill ticker (a fixed `/contact` link, not editorial content).
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 3 new files above changed; `client/` and `server/` untouched.
+
+**New UI issue found, logged not fixed (UI_ISSUES_REPORT.md #4):** the "Exploring" button beside the web3 ticker has no `href` at all - unlike "Let's Connect" right above it, which correctly links to `/contact`.
+
+**Not done in this task:** no content entered anywhere; fetching and rendering this on the About page is Category 3/4, not this one.
+
+**Next:** the user picks - continue Category 2 (2.5, 2.7, or the new 2.9), or pause here.
+
+### Session 15 (continued) — CMS Category 2, task 2.5: `faqItem`
+
+**The simplest schema yet.** `FAQData.js`'s `faq` array is a flat list of `{title, answer}` pairs, and `FAQ.jsx` renders it straight into a HeroUI `<Accordion>` with no surrounding heading text anywhere - the first section this pass where there was no permanent-heading call to make at all.
+
+**Built:** `studio/schemaTypes/documents/faqItem.js` - `question` (renamed from the data file's `title`, which is what it actually is), `answer` (plain text, matching `featuredProject.description`'s reasoning - single-paragraph prose, no lists or inline formatting to justify portable text), `displayOrder`. `studio/schemaTypes/index.js` updated to register it.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 1 new file changed; `client/` and `server/` untouched.
+
+**Not done in this task:** no content entered anywhere; fetching and rendering this on the Contact page is Category 3/4.
+
+**Category 2 status:** 2.1-2.6 all done. Only 2.7 (`lab`) and the proposed 2.9 (`pageHero`) are real remaining work - 2.8 is a standing note for Category 5, not a task to execute now.
+
+**Next:** the user picks - 2.7, the proposed 2.9, or pause/close out the category here.
+
+### Session 15 (continued) — CMS Category 2, task 2.7: `lab`, `labCategory`
+
+**New feature, not a migration** - the Labs page is currently a placeholder, so this task built against the field list Category 7 itself already anticipated (title, description, GitHub link, live link, documentation) rather than reverse-engineering existing markup.
+
+**Mid-task gap, caught before continuing rather than assumed past:** this task was started, then resumed after a gap. Checked the actual files rather than trusting memory of having done the work: `package.json` had the new dependency correctly pinned, `node_modules` genuinely had it installed, but no `labCategory`/`lab` schema files existed yet and 2.7 was still unmarked everywhere - so only the dependency install had actually landed. Continued from exactly that point rather than re-doing it or skipping ahead.
+
+**`labCategory` is a real document type, not a closed list or free text on `lab`.** Categories are expected to keep growing as new kinds of mini-projects get added - a closed list would mean a schema edit per new category (working against the entire point of a CMS), and a free-text string risks "Authentication" / "Auth" / "authentication" silently becoming three separate rows instead of one. A reference means the category is picked from what already exists in Studio, not retyped per entry.
+
+**Category 7's "variant" turned out to be the `lab` document itself**, not a separate field - each `lab` document already is one variant within its category by virtue of existing, so a field that just restated that would have been redundant.
+
+**`documentation` needed real code blocks, not just prose** - more than every portable-text field built so far. The whole point of this page is showing other developers how to use something: install commands, config, usage examples. Added `@sanity/code-input` (the first new Studio dependency since Category 1) rather than approximate code with a monospace text style, which would lose syntax highlighting and language-aware editing for no reason. Checked peer-dependency compatibility against the npm registry first - `sanity ^5 || ^6.0.0-0`, `react ^19.2`, `styled-components ^6.1` - all satisfied by this project's installed versions - before installing, then fixed the install to use the same `^` version-range convention already used by every other dependency in the file (npm's default pinned it exactly, which would have been the one dependency in the file that couldn't float patch updates like the rest).
+
+**Built:**
+- `studio/schemaTypes/documents/labCategory.js` - `name`, `displayOrder`.
+- `studio/schemaTypes/documents/lab.js` - `title`, `category` (reference to `labCategory`), `description`, `githubUrl` (required - the code is the point of this page), `liveUrl` (optional), `documentation` (portable text: Normal/H3/H4 styles, bullet/numbered lists, bold/italic/inline-code, a link annotation, plus real `code` blocks with a curated language list - JS/TS/JSX/TSX/JSON/Bash/HTML/CSS), `displayOrder`.
+- `studio/sanity.config.js` - registered the `codeInput()` plugin.
+- `studio/package.json`, `studio/package-lock.json` - added `@sanity/code-input@^7.3.10`.
+- `studio/schemaTypes/index.js` updated to register both new documents.
+
+**Also fixed:** Category 7's own intro previously claimed `lab`'s schema "already existed" from an earlier session - never true, and left uncorrected it would have caused real confusion once Category 7 actually starts. Corrected now that the schema genuinely exists, and Category 7's field-list note updated to match the real field names.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - `studio/schemaTypes/index.js`, the 2 new document files, `studio/sanity.config.js`, and (new this task) `studio/package.json` + `studio/package-lock.json`; `client/` and `server/` untouched.
+
+**Not done in this task:** no content entered anywhere; the actual Labs page, its motion design, the route, and rendering `documentation` are Category 7, not this task.
+
+**Category 2 status: 2.1-2.7 all done.** Only the proposed 2.9 (`pageHero`) is real remaining work - 2.8 stays a standing note for Category 5.
+
+**Next:** the user decides on 2.9, or closes out Category 2 here.
+
+### Session 15 (continued) — CMS Category 2, task 2.9: `sectionIntro` (renamed from the proposed `pageHero`) — Category 2 complete
+
+**Consolidates the 4 hero-level gaps found along the way** rather than leaving them as scattered flags: Home hero's tagline (2.1), Home timeline's intro paragraph and heading (2.1), Develop hero's rotating image set (2.2), Design hero's video (2.2).
+
+**Renamed `pageHero` to `sectionIntro`** - the proposal's own name undersold it once actually built: the timeline instance is a section within the Home page, not the page's own hero. The 4 instances need genuinely different fields (a hero has a tagline and no media; a service-page hero has media and no tagline), so every field is optional and a closed-list `sectionKey` says which instance a document is - closed, unlike `labCategory`, because this set is fixed by where it gets fetched in the code, not expected to grow the way lab categories are.
+
+**Resolved the open year-range question from the proposal.** The timeline's "My Tech Journey (2022-2025)" heading keeps its text in the component, same as every other permanent heading - but the two numbers inside it come out as `journeyStartYear`/`journeyEndYear` fields, since unlike a purely stylistic heading this one embeds a date that will become factually wrong, not just look dated. `journeyEndYear` is optional specifically so an editor can leave it blank to mean "ongoing" rather than needing to keep re-entering a fixed year that would only go stale again.
+
+**Built:** `studio/schemaTypes/documents/sectionIntro.js` - `sectionKey` (closed list), `tagline`, `journeyStartYear`, `journeyEndYear`, `images`, `video`. `studio/schemaTypes/index.js` updated to register it.
+
+**Verification:** `npx sanity schema validate` - 0 errors, 0 warnings. `npm ci && npx sanity build` - clean, offline. `diff -r` against the uploaded zip - only `studio/schemaTypes/index.js` and the 1 new file changed; `client/` and `server/` untouched.
+
+**Not done in this task:** no content entered anywhere; fetching and rendering this is Category 3/4.
+
+---
+
+## Category 2 complete
+
+13 document types, 3 reusable object types, 1 shared field-set helper, built one task at a time across 9 sub-steps (2.1-2.7, 2.9; 2.8 stays a standing note for Category 5, not a task). One new Studio dependency added along the way (`@sanity/code-input`, 2.7). Every task validated offline (`npx sanity schema validate` + `npx sanity build`, 0 errors/0 warnings each time) before being marked done; `client/` and `server/` were never touched - every change this category landed inside `studio/` and `docs/`.
+
+The plan's one-line descriptions turned out wrong or incomplete often enough that reading the real code first, every task, rather than trusting the bullet points, was the right call each time: 2.1's "bio paragraph" was three paragraphs; 2.2's `serviceItem` was actually a group; 2.3 caught two real Tailwind-JIT bugs before they could ship; 2.6's resume/social links weren't where the plan said; 2.7's "variant" turned out to be the document itself, not a field; 2.9 surfaced a genuinely new gap (the stale year-range heading) that no earlier category anticipated.
+
+No content exists in any dataset yet - that's Category 5's seed script, or manual entry once task 1.5 (the owner's actual Sanity project setup) is done. Fetching and rendering any of this on the live site is Category 3/4, not started.
+
+**Next: Category 3 — Static Copy Migration**, whenever the user is ready.
