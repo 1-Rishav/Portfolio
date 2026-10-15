@@ -271,16 +271,118 @@ on it. Next up: Category 3.**
 Single strings/paragraphs, one per spot. Mechanically identical work
 wherever it appears: replace a hardcoded string with a field read off
 `siteSettings` (or the page's own document).
+**Status: complete. First time this project's `client/` was actually touched - every prior category stayed
+inside `studio/`/`docs/`. Every task validated with `npm run build` and `npm run lint` in place of the
+Studio's schema validator, and from 3.2 onward also verified by server-rendering the real fallback data and
+checking the output (character-for-character where an exact match was the goal, with any deliberate
+difference named rather than glossed over). Two real mistakes were caught by re-checking before continuing
+rather than assuming a prior pass was complete - both fixed before being marked done, not after (3.2's "Hi,"
+duplication bug; this category's own task 3.1 was itself a recovery from an earlier interruption). `server/`
+confirmed untouched the entire category. Next up: Category 4.**
 
-- ⬜ About — bio paragraph (`siteSettings.aboutBio`)
-- ⬜ Contact — heading + hero image (`siteSettings.contactHeading` / `contactImage`)
-- ⬜ Footer — phone / email / address (`siteSettings.phone` / `email` / `address`)
-- ⬜ Footer — social links (`siteSettings.socialLinks`)
-- ⬜ About/footer — resume link (`siteSettings.resumeUrl`)
+- ✅ **3.1 Foundation** — the DRY note's `useSiteSettings()` hook, plus the fallback-content half of
+  architecture decision 13 that no earlier category needed yet. `client/src/components/Data/
+  SiteSettingsFallback.js` mirrors `siteSettings`' exact shape, transcribed from the real current values in
+  `About.jsx`, `Contact.jsx`, `Footer_BeamsCollision.jsx` and `Float_Icon.jsx` - including two spots kept
+  exactly as-is rather than quietly corrected (a missing space, a reversed phone country code), logged in
+  the UI issues report instead (#5, #6) so fixing them is a decision made on purpose, not a side effect of
+  this migration. `aboutBio` is real Portable Text blocks, not a plain string, so it renders through the
+  identical `<PortableText>` call as real Sanity content would - installed `@portabletext/react` for this,
+  pinned to `^6.2.0` (the last release supporting this project's React 18; 7.0.0+ requires React 19, checked
+  against the registry before installing, same method as `@sanity/code-input` in 2.7). `useSiteSettings()`
+  itself: a module-level cache so the one `siteSettings` document is fetched once and shared by every
+  consumer (About, Contact, the footer) rather than each re-fetching it, returning the fallback immediately
+  and swapping to real content if and when the fetch resolves - no loading state, since the fallback already
+  is what the site shows today. Also added `resolveImage()` to `sanityClient.js` (not siteSettings-specific
+  - every image field from here on needs the same "Sanity image, or fall back to a local import" resolution,
+  so it lives next to `urlFor()` rather than inside this one hook). **Verified:** `npm run lint` on the new/
+  edited files - clean; `npm run build` - succeeds (exercising the real unconfigured-Sanity code path, since
+  this sandbox has no live project id, matching the site's actual current deployed state); diffed against
+  the previous zip - `client/package.json` + `package-lock.json` (new dependency), `client/src/utils/
+  sanityClient.js` (edited), 2 new files; nothing in `server/` touched, and no component wired up to any of
+  this yet - that's 3.2 onward.
+- ✅ **3.2** About — bio paragraph (`siteSettings.aboutBio`) — the DRY note's first real test, and not quite a
+  one-line change: `aboutBio`'s three blocks map to two different DOM locations with two different wrapper
+  styles (the big intro div, and two separate `<h2>`s), not one flowing paragraph, so each block is rendered
+  with its own `<PortableText value={[settings.aboutBio[n]]}>` call and a `components.block.normal` matching
+  that block's original wrapper exactly, sharing one `bioMarks` object (just `underline`) across all three.
+  "Hi," keeps its own `text-blue-800` span in the component, same as every other heading-adjacent accent
+  (architecture decision 12) - it has no equivalent in the schema's marks (strong/em/underline, no color), so
+  it was never meant to be content. **A real bug caught by re-verifying before continuing, not assumed
+  fixed:** a prior pass had updated `SiteSettingsFallback.js`'s comment to say "Hi," was removed, but never
+  actually touched the text itself - still would have rendered "Hi,Hi,I'm..." Caught and fixed before this
+  task was marked done. **Verified beyond the usual build/lint:** server-rendered all three paragraphs with
+  `ReactDOMServer.renderToStaticMarkup` straight from the real fallback data and compared the output
+  character-for-character against the original markup - exact match, including the missing spaces, the
+  stray spaces before two periods, and the underline span positions; this is the first content-rendering
+  task in Category 3, and compiling cleanly doesn't prove the text comes out identical, so this task didn't
+  stop at the usual checks. `npm run lint` - 1 pre-existing error remains (`Let's Connect` button's
+  unescaped apostrophe, unrelated to this task, elsewhere in the file - confirmed by linting the original
+  file for comparison); no new errors or warnings introduced, and this change removed one of the two
+  pre-existing instances of that exact error as a side effect, rather than adding to it. `npm run build` -
+  succeeds. Diffed against the previous zip - `About.jsx` and `SiteSettingsFallback.js` changed; nothing
+  else in `client/` or anywhere in `server/` touched.
+- ✅ **3.3** Contact — heading + hero image (`siteSettings.contactHeading` / `contactImage`) — closer to the
+  promised one-line change than 3.2, but surfaced one more piece of the already-flagged heading
+  simplification: re-reading the exact markup for this task found that "Let's Connect" wasn't just split
+  from "and Create" by a `<br/>` (already known, flagged in 3.1) - it also sat in its own `<span>` with
+  responsive left-padding (`px-2` through `4xl:px-60`) that "and Create" didn't have, a staggered-indent
+  effect that a single content string can't reproduce without an arbitrary split point. Left out along with
+  the `<br/>`, for the same reason: `contactHeading` renders as one continuous string, wrapping naturally.
+  First real use of `resolveImage()` (built in 3.1): `contactImage` resolves through it with
+  `images.Project1_i` as the fallback - the same image the page already uses - and the empty `alt=""` on the
+  live site is gone, replaced by a real value either way (the schema's required `contactImage.alt` for real
+  Sanity data, `siteSettingsFallback.contactImageAlt` for the fallback - read from the fallback module
+  directly rather than through `settings`, since a real siteSettings document has no top-level
+  `contactImageAlt` field for that to mean). **Verified:** `npm run lint` - clean. `npm run build` - succeeds.
+  Server-rendered the heading and resolved the image from the real fallback data (esbuild + `--define` to
+  shim Vite's `import.meta.env`, since this isn't running through Vite itself) - image src matches the
+  original local import exactly, alt text correct, heading text correct including the curly apostrophe.
+  Diffed against the previous zip - only `Contact.jsx` changed beyond 3.1/3.2's files; `server/` untouched.
+- ✅ **3.4** Footer — phone / email / address (`siteSettings.phone` / `email` / `address`) — the simplest task
+  so far, genuinely close to the DRY note's one-line change: `phone` and `email` are directly `{settings.phone}` /
+  `{settings.email}`. `address` splits on its literal `"\n"` and maps each line with a `<br/>` between -
+  generic for however many lines an editor actually enters, not hardcoded for exactly two the way the live
+  markup is today. **Verified:** `npm run lint` - clean. `npm run build` - succeeds. Server-rendered the
+  three fields from the real fallback data - phone and email matched the original exactly; the address
+  matched with one documented, insignificant difference: today's JSX has a literal space on each side of its
+  `<br />` ("PG <br /> Ramapuram"), which this render does not reproduce, since the fallback's `"\n"`-joined
+  string was written without them. No visual effect either way - browsers collapse whitespace immediately
+  adjacent to a line break - so this was left as is rather than added back for a difference nothing will
+  ever show. Diffed against the previous zip - only `Footer_BeamsCollision.jsx` changed beyond 3.1-3.3's
+  files; `server/` untouched.
+- ✅ **3.5** Footer — social links (`siteSettings.socialLinks`) — a design tension worth recording, not just
+  the mechanical wiring: hardcoding three lookups for linkedin/github/twitter specifically would have been
+  the easy match for today's exact layout, but it would silently break the `socialLink` schema's own promise
+  (2.6) that adding a platform already on its list is a content change, not a code change - a 4th link added
+  in Studio would just never appear. Mapped `settings.socialLinks` generically instead, in whatever
+  order/count it actually holds, with a `PLATFORM_META` lookup covering all 7 platforms the schema allows,
+  not only the 3 live today - built and verified now (real icons confirmed render for all 7, not just
+  assumed from import success) rather than left as a future gap. An unrecognized platform is dropped, not
+  rendered broken, defensive given the schema's closed list should make it impossible but not assumed.
+  **One deliberate, flagged position change:** Resume (still hardcoded - 3.6) moved from its current
+  2nd-of-4 slot to after the social links, since that position only made sense relative to today's fixed
+  3-link order; once the link count is genuinely variable there is no single index that stays correct once a
+  4th or 5th social link exists. **Verified:** `npm run lint` - clean. `npm run build` - succeeds.
+  Server-rendered the full platform-to-icon resolution from the real fallback data: all 3 entries resolved
+  with correct titles, hrefs, and actual rendering SVG icons (not just confirmed to import without error);
+  separately confirmed an unrecognized platform is dropped rather than crashing. Diffed against the previous
+  zip - only `Float_Icon.jsx` changed beyond 3.1-3.4's files; `server/` untouched.
+- ✅ **3.6** About/footer — resume link (`siteSettings.resumeUrl`) — genuinely the one-line change the DRY
+  note promised, the only task in this category that was: `href: settings.resumeUrl` in place of the
+  hardcoded Google Drive URL in `Float_Icon.jsx`'s "Resume" entry (3.5 already handled its position in the
+  dock). "About/footer" in this task's own title turned out to describe where a resume link conceptually
+  belongs, not two separate places to wire - confirmed by checking: the only functional resume link anywhere
+  is this one dock entry; the footer's own "Resume" nav text is the already-flagged dead link
+  (UI_ISSUES_REPORT.md #3), not a second real link to migrate. **Verified:** `npm run lint` - clean, same
+  one pre-existing unrelated error as every other task this category. `npm run build` - succeeds. Confirmed
+  `SiteSettingsFallback.js`'s `resumeUrl` value matches the original hardcoded URL character-for-character.
+  Diffed against the previous zip - only `Float_Icon.jsx` changed beyond 3.1-3.5's files; `server/`
+  untouched.
 
-**DRY note:** all of these are one `siteSettings` document, fetched once. Build
-a single `useSiteSettings()` hook and every item above is a one-line change
-in its component, not a new fetch each time.
+**DRY note:** all of these are one `siteSettings` document, fetched once via
+`useSiteSettings()` (3.1) - every item above is now a one-line change in its
+component, not a new fetch each time.
 
 ## Category 4 — Repeatable List Migration
 Anywhere a component currently does `hardcodedArray.map(...)`. The fetch +
