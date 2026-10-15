@@ -57,6 +57,24 @@ button next to the web3 image ticker, around line 362): unlike the
 does nothing. Noticed while reading this file for the `skillTickerItem`/
 `web3TickerItem` schemas (Category 2.4).
 
+### 5. Footer phone number is formatted "91+ ..." instead of "+91 ..."
+`client/src/components/Footer_BeamsCollision.jsx`: the phone number reads
+`91+ 8271228935` - the country code and the `+` are swapped from the
+standard `+91 8271228935` format. Beyond looking wrong, a visitor who
+copies this exact text into a dialer may not get a valid number. Noticed
+while transcribing the exact current value into `SiteSettingsFallback.js`
+for Category 3.1 - carried over unchanged into the fallback (a data-source
+migration isn't the moment to silently correct it), so it's still showing
+today's exact text either way, logged here instead.
+
+### 6. About bio has a few missing/stray spaces
+`client/src/components/Navigation/About.jsx`: the bio text reads
+"Hi,I'm an expert..." and "...professional services.I create..." with no
+space after the comma and the period, and two sentences end "quality ."
+and "impact ." with a stray space before the period. Minor, but noticed
+while transcribing the exact current text into `SiteSettingsFallback.js`
+for Category 3.1 and carried over unchanged for the same reason as #5.
+
 ---
 
 ## Carried forward from earlier sessions (already logged in `README.md`, listed here only so this is a complete picture in one place)
