@@ -567,3 +567,117 @@ The plan's one-line descriptions turned out wrong or incomplete often enough tha
 No content exists in any dataset yet - that's Category 5's seed script, or manual entry once task 1.5 (the owner's actual Sanity project setup) is done. Fetching and rendering any of this on the live site is Category 3/4, not started.
 
 **Next: Category 3 — Static Copy Migration**, whenever the user is ready.
+
+### Session 15 (continued) — CMS Category 3, task 3.1: foundation (`useSiteSettings()`, fallback content)
+
+**First time `client/` is actually touched** - every category so far stayed inside `studio/`/`docs/`. Numbered Category 3's tasks (3.1-3.6, matching the Category 2 convention) and added 3.1 for the DRY note's hook plus the fallback-content side of architecture decision 13, which no earlier category needed yet.
+
+**Mid-task gap again, checked before continuing rather than assumed:** this task was interrupted twice and resumed both times by re-checking the actual files first. First gap: `@portabletext/react` was genuinely installed but no hook or fallback files existed yet. A false alarm worth recording: a quick shell check of `client/package.json`'s line endings gave a wrong "0 CRLF" reading because of a `&&`/`;` mixing bug in the command itself (grep's zero-matches exit code silently skipped the next check) - re-verified byte-by-byte with Python instead of trusting the first, faster check, which is what caught the mistake. The real answer: `client/package.json` is genuinely CRLF throughout (67 lines originally, 68 after `npm install` added one line, 0 stray LF either time) - `npm install` preserved the convention correctly; there was never an actual problem, just an unreliable check. Second gap: resumed again after that, with the dependency and the verified line-ending state intact, nothing further written yet - continued from exactly there.
+
+**Transcribed the real current values, not approximations**, into `client/src/components/Data/SiteSettingsFallback.js`: read `About.jsx`, `Contact.jsx`, `Footer_BeamsCollision.jsx`, and `Float_Icon.jsx` directly rather than relying on memory of the 2.6 read. Two small issues surfaced by doing this character-for-character: a reversed phone country code ("91+" instead of "+91") and a couple of missing/stray spaces in the bio text. Carried both into the fallback exactly as they are today rather than silently fixed - a data-source migration isn't the moment to also change what's displayed - and logged as UI_ISSUES_REPORT.md #5 and #6 instead.
+
+**`aboutBio` is real Portable Text, not a plain string or array of strings** - built as actual block/span objects with `underline` marks on "creativity", "quality ", and "flexible", matching exactly what the schema expects and what `<PortableText>` renders, so the same component call works identically whether the data came from Sanity or from here. Needed `@portabletext/react` for this; the latest release (8.0.1) requires React 19, this project is on React 18.3, so checked the version history against the npm registry first and pinned `^6.2.0` - the last line supporting React 18 (`^18.2 || ^19`) - same compatibility-check method used for `@sanity/code-input` in 2.7.
+
+**`useSiteSettings()`** - a module-level cache so the one `siteSettings` document is fetched once and shared across every future consumer (About, Contact, the footer) instead of each independently re-fetching the same document; returns the fallback immediately and swaps to real content if a fetch resolves with an actual document - no loading state, since the fallback already is what the site shows today. A fetch that resolves with nothing (configured, but no `siteSettings` document published yet) isn't retried again this session, the same as a real failure - deliberate, not an oversight: retrying on every mount could mean hammering a genuinely unreachable endpoint repeatedly. A page reload tries again.
+
+**Also added `resolveImage()` to `sanityClient.js`**, not folded into the hook: every image field from here on (not just `contactImage`) will need the same "Sanity image, or fall back to a local import" resolution, so it lives next to `urlFor()` where every future consumer can reach it.
+
+**Built:**
+- `client/src/components/Data/SiteSettingsFallback.js` - new.
+- `client/src/hooks/use_site_settings.jsx` - new.
+- `client/src/utils/sanityClient.js` - added `resolveImage()`.
+- `client/package.json`, `client/package-lock.json` - added `@portabletext/react@^6.2.0`.
+
+**Verification:** `npm run lint` on the new/edited files - clean. `npm run build` - succeeds, exercising the real unconfigured-Sanity fallback path (no project id set in this sandbox, same as the site's actual current deployed state). `diff -r` against the uploaded zip - exactly the 4 items above changed in `client/`; `server/` untouched; no component wired up to any of this yet.
+
+**Not done in this task:** nothing renders from this yet - no component reads `useSiteSettings()` or `siteSettingsFallback` directly. That starts at 3.2.
+
+**Next:** 3.2 (About bio paragraph) is the natural next step - the DRY note's promised "one-line change" gets its first real test.
+
+### Session 15 (continued) — CMS Category 3, task 3.2: About bio paragraph
+
+**Not quite the "one-line change" the DRY note promised** - `aboutBio`'s three blocks map to two different DOM locations with two different wrapper styles (the big intro div; two separate `<h2>`s further down), not one flowing paragraph. Rendered each block with its own `<PortableText value={[settings.aboutBio[n]]}>` call and a `components.block.normal` matching that specific block's original wrapper, sharing one `bioMarks` component (just `underline`, the only custom mark the schema defines) across all three.
+
+**"Hi," stays hardcoded**, with its own `text-blue-800` span, same treatment as every other heading-adjacent accent (architecture decision 12) - the schema's marks are strong/em/underline, no color, so there was never a way for this to be content in the first place.
+
+**Caught a real bug by re-checking before continuing, not assuming the prior pass was complete:** this task was interrupted and resumed once. Checking the actual files first (per the standing instruction to verify rather than trust memory) found that an earlier pass had updated `SiteSettingsFallback.js`'s *comment* to say "Hi," had been removed from the bio text, but never actually touched the text itself - it still read "Hi,I'm an expert...". Paired with About.jsx's now-separate hardcoded "Hi," span, this would have rendered as "Hi,Hi,I'm an expert..." on the live page. Fixed before marking this done, not after.
+
+**Verified further than the usual lint/build this time**, since this is the first task in Category 3 that actually renders content: wrote a one-off script that imports the real `siteSettingsFallback` data and server-renders all three paragraphs with `ReactDOMServer.renderToStaticMarkup`, the exact same component structure used in `About.jsx`, then compared the output character-for-character against the original markup. Exact match - the missing spaces, the stray spaces before two of the periods, and the underline positions all came through identically. Compiling cleanly doesn't prove the text renders identically, so this task didn't stop at the usual checks. Script was temporary, deleted after use - not part of the deliverable.
+
+**Lint:** 1 pre-existing error remains (`Let's Connect` button's unescaped apostrophe, elsewhere in the file, unrelated to this task - confirmed by linting the original file for comparison). No new errors or warnings from this change; it incidentally removed one of two pre-existing instances of that same error as a side effect of replacing the bio text, rather than adding to the count.
+
+**Built:** `client/src/components/Navigation/About.jsx` - wired to `useSiteSettings()` and `<PortableText>`. `client/src/components/Data/SiteSettingsFallback.js` - the "Hi," fix.
+
+**Verification:** `npm run lint` - no new issues. `npm run build` - succeeds. Server-rendered comparison - exact match to the original markup. `diff -r` against the uploaded zip - only `About.jsx` and `SiteSettingsFallback.js` changed beyond 3.1's files; `server/` untouched.
+
+**Not done in this task:** Contact, the footer, and the resume link are still hardcoded - 3.3 onward.
+
+**Next:** 3.3 (Contact heading + hero image).
+
+### Session 15 (continued) — CMS Category 3, task 3.3: Contact heading + hero image
+
+**Closer to the promised one-line change than 3.2**, but surfaced one more piece of the heading simplification already flagged in 3.1: re-reading the exact markup for this task found "Let's Connect" wasn't just split from "and Create" by a `<br/>` (already known) - it also sat in its own `<span>` with responsive left-padding (`px-2` through `4xl:px-60`) that "and Create" didn't have, a staggered-indent effect a single content string can't reproduce without an arbitrary split point. Left out along with the `<br/>`, for the same reason - `contactHeading` renders as one continuous string, wrapping naturally.
+
+**First real use of `resolveImage()`** (built in 3.1, unused until now): `contactImage` resolves through it with `images.Project1_i` as the fallback - the same image the page already shows. The live site's empty `alt=""` is gone either way: a real value now comes from the schema's required `contactImage.alt` when there's real Sanity data, or `siteSettingsFallback.contactImageAlt` for the fallback - read from the fallback module directly rather than through `settings`, since a real siteSettings document has no top-level `contactImageAlt` field for that to mean.
+
+**Gap mid-task, this time in the verification tooling itself, not the application code:** interrupted once while writing a server-render verification script (same approach as 3.2). Checking the actual files first found `Contact.jsx`'s real edit was intact and correct - the interruption happened mid-verification-script, not mid-component-edit. The script itself had been failing with `Cannot read properties of undefined (reading 'VITE_SANITY_PROJECT_ID')` - Vite replaces `import.meta.env.*` at build time, which esbuild's bundler alone doesn't do, so running the real `sanityClient.js` under plain Node needed `--define` flags shimming those exact reads. Fixed and reran rather than abandoning the check: image src matched the original local import exactly, alt text correct, heading text correct including the curly apostrophe.
+
+**Built:** `client/src/components/Navigation/Contact.jsx` - wired to `useSiteSettings()` and `resolveImage()`.
+
+**Verification:** `npm run lint` - clean. `npm run build` - succeeds. Server-rendered comparison (with the `import.meta.env` shim) - image and heading both correct. `diff -r` against the uploaded zip - only `Contact.jsx` changed beyond 3.1/3.2's files; `server/` untouched.
+
+**Not done in this task:** the footer's phone/email/address, social links, and the resume link are all still hardcoded.
+
+**Next:** 3.4 (Footer phone/email/address).
+
+### Session 15 (continued) — CMS Category 3, task 3.4: Footer phone/email/address
+
+**The simplest task in Category 3 so far, genuinely close to the DRY note's one-line change.** `phone` and `email` are directly `{settings.phone}` / `{settings.email}`. `address` splits on its literal `"\n"` and maps each line with a `<br/>` between - generic for however many lines an editor enters, not hardcoded for exactly two the way the live markup is today.
+
+**Verified:** `npm run lint` - clean. `npm run build` - succeeds. Server-rendered all three fields from the real fallback data: phone and email matched the original exactly; the address matched with one documented, insignificant difference - today's JSX has a literal space on each side of its `<br />` ("PG <br /> Ramapuram"), which this render doesn't reproduce, since the fallback's `"\n"`-joined string was written without them. No visual effect either way, since browsers collapse whitespace immediately adjacent to a line break - left as is rather than added back for a difference nothing will ever show, but called out rather than silently claimed as an exact match.
+
+**Built:** `client/src/components/Footer_BeamsCollision.jsx` - wired to `useSiteSettings()`.
+
+**Verification:** `npm run lint` - clean. `npm run build` - succeeds. Server-rendered comparison - exact match on phone/email, one noted insignificant whitespace difference on address. `diff -r` against the uploaded zip - only `Footer_BeamsCollision.jsx` changed beyond 3.1-3.3's files; `server/` untouched.
+
+**Not done in this task:** social links and the resume link are still hardcoded, both in `Float_Icon.jsx`.
+
+**Next:** 3.5 (Footer social links).
+
+### Session 15 (continued) — CMS Category 3, task 3.5: Footer social links
+
+**A design tension worth working through, not just mechanical wiring.** Hardcoding three lookups for linkedin/github/twitter specifically would have matched today's exact layout, but would silently break the `socialLink` schema's own promise (2.6) that adding a platform already on its list is a content change, not a code change - a 4th link added in Studio would just never show up with that approach. Mapped `settings.socialLinks` generically instead, in whatever order or count it actually holds, with a `PLATFORM_META` lookup covering all 7 platforms the schema allows - built and verified now, not left as a gap to discover later. An unrecognized platform is dropped rather than rendered broken, defensive even though the schema's closed list should make it impossible.
+
+**One deliberate, flagged position change:** Resume (still hardcoded - that's 3.6) moved from its current 2nd-of-4 position to after the social links. That position only meant something relative to today's fixed 3-link order; once the count is genuinely variable there's no single index that stays correct once a 4th or 5th social link exists, so there wasn't a way to keep both "exact position" and "genuinely CMS-driven."
+
+**Built:** `client/src/components/Float_Icon.jsx` - `settings.socialLinks` mapped through a `PLATFORM_META` table (title + icon per platform, all 7 schema options, not just the 3 live today).
+
+**Verification:** `npm run lint` - clean. `npm run build` - succeeds. Server-rendered the full platform-to-icon resolution from the real fallback data - all 3 entries resolved with correct titles, hrefs, and actual rendering SVG icons (checked the icons really render, not just that the imports succeed); separately confirmed an unrecognized platform drops safely instead of crashing. `diff -r` against the uploaded zip - only `Float_Icon.jsx` changed beyond 3.1-3.4's files; `server/` untouched.
+
+**Not done in this task:** the resume link is still hardcoded - 3.6, the last task in Category 3.
+
+**Next:** 3.6 (resume link) - the last task before Category 3 is complete.
+
+### Session 15 (continued) — CMS Category 3, task 3.6: resume link — Category 3 complete
+
+**Genuinely the one-line change the DRY note promised** - the only task in this category that actually was one: `href: settings.resumeUrl` in place of the hardcoded Google Drive URL in `Float_Icon.jsx`'s "Resume" entry (3.5 already handled its position in the dock). "About/footer" in this task's own title turned out to describe where a resume link conceptually belongs, not two separate places to wire - checked rather than assumed: the only functional resume link anywhere in the codebase is this one dock entry; the footer's own "Resume" nav text is the already-flagged dead link (#3), not a second real link.
+
+**Built:** `client/src/components/Float_Icon.jsx` - the Resume entry's `href`.
+
+**Verification:** `npm run lint` - clean, same one pre-existing unrelated error as every task this category. `npm run build` - succeeds. Confirmed the fallback's `resumeUrl` matches the original hardcoded URL character-for-character.
+
+**Not done in this task:** nothing - this was the last piece.
+
+---
+
+## Category 3 complete
+
+6 tasks (3.1-3.6): the DRY note's foundation (`useSiteSettings()`, the fallback content module, `resolveImage()`), then the About bio, the Contact heading and image, the footer's contact details, the footer's social links, and the resume link - every hardcoded value `docs/CMS_INTEGRATION_PLAN.md`'s Category 3 originally listed, now read from `siteSettings` with the exact current content as the fallback. First category to touch `client/` at all; `server/` stayed untouched the whole way through, confirmed at the end, not just assumed from not having gone near it.
+
+Only one of the six tasks (3.6) was actually the "one-line change" the DRY note promised going in. The other five each surfaced something real: 3.2 needed three separate `<PortableText>` calls because the bio's blocks map to two different DOM locations, not one flowing paragraph, and caught a real "Hi,Hi,I'm..." duplication bug by re-checking before marking done rather than trusting an earlier pass; 3.3 found the heading's responsive padding span, not just its line break, didn't survive becoming a single content string; 3.5 ran into a genuine design tension (hardcode three platform lookups to match today's layout exactly, or map generically and honor the schema's own promise that a new platform is a content change) and chose the schema's promise over exact-position fidelity, saying so plainly rather than picking the easier, quieter option.
+
+From 3.2 onward, every task was verified beyond lint and build: server-rendering the real fallback data through the same component structure and checking the actual output, not just that it compiled. Two real mistakes surfaced this way rather than shipping - the "Hi," duplication (3.2) and an `import.meta.env` tooling gap in the verification script itself (3.3), fixed rather than worked around. Where a difference from today's exact output was found and judged insignificant (address whitespace next to a `<br/>`, 3.4), it was named rather than folded into a claimed exact match.
+
+No content exists in any dataset yet - that's still task 1.5 (the owner's own Sanity project setup) plus either manual entry or Category 5's seed script. The site's actual behavior right now, fallback included, is unchanged from before this category - everything renders through the same fallback content that already matched what was live, which is the entire point of architecture decision 13.
+
+**Next: Category 4 — Repeatable List Migration**, whenever the user is ready.
