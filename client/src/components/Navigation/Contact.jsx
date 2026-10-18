@@ -2,20 +2,29 @@ import ContactForm from '../Form_&_Features/ContactForm'
 import {Separator} from '@/components/ui/separator'
 import FAQ from '../Form_&_Features/FAQ'
 import images from '../../assets/index'
+import { useSiteSettings } from '../../hooks/use_site_settings'
+import { siteSettingsFallback } from '../Data/SiteSettingsFallback'
+import { resolveImage } from '../../utils/sanityClient'
 function Contact() {
+  const settings = useSiteSettings();
+  // Fallback alt always comes from the fallback module itself, not from `settings` - a real siteSettings
+  // document has no top-level `contactImageAlt` field (alt lives nested under contactImage.alt instead,
+  // required by the schema), so this is never meant to vary with the fetched data the way `settings`' other
+  // fields do.
+  const heroImage = resolveImage(settings.contactImage, images.Project1_i, siteSettingsFallback.contactImageAlt);
   return (
     <>
     <div className=' relative pt-14 pb-10 | lg:pt-28 lg:pb-16 | xl:pt-32 flex items-start  justify-between xl:px-20 lg:px-14 md:px-10 max-md:px-5 h-full w-full'>
     
-              <div className=' h-full w-fit md:text-7xl xl:text-9xl sm:text-4xl max-sm:text-2xl text-xl font-semibold leading-1 '><li className='md:text-xl text-sm text-gray-600 mb-5 '>Contact</li> <span className='px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60'>Let’s Connect</span><br/> and Create<span className='text-emerald-500'>.</span></div>
+              <div className=' h-full w-fit md:text-7xl xl:text-9xl sm:text-4xl max-sm:text-2xl text-xl font-semibold leading-1 '><li className='md:text-xl text-sm text-gray-600 mb-5 '>Contact</li> {settings.contactHeading}<span className='text-emerald-500'>.</span></div>
               {/* <div className=' px-2 | lg:px-3 | xl:px-4 w-fit mb-10 | pl-10 md:pl-14 | lg:pl-24 | xl:pl-[6rem]  lg:mb-0 lg:w-7/16 '> */}
               <div className=' h-[11rem] sm:h-[14rem] md:h-[18rem] lg:h-[18rem] xl:h-[20rem] md:w-[16%] max-md:w-[27%] sm:w-[23%]  text-3xl | md:text-2-5xl | xl:text-3xl | 4xl:text-4xl font-sans-primary tracking-tight text-black  | dark:text-grayDark-100 leading-tight text-balance  lg:pr-0  bg-transparent  rounded-2xl   flex '>
                 <div className="relative group">
     
                   {/* Image */}
                   <img
-                    src={images.Project1_i}
-                    alt=""
+                    src={heroImage.src}
+                    alt={heroImage.alt}
                     className=" rounded-2xl h-[11rem] sm:h-[14rem] md:h-[18rem] lg:h-[18rem] xl:h-[20rem] w-full hover:translate-x-2 transition-transform-colors "
                   />
                 </div>
