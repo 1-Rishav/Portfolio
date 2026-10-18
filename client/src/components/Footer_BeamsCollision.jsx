@@ -1,8 +1,15 @@
 import React from "react";
 import { BackgroundBeamsWithCollision } from "../components/ui/footer_beams_collision";
 import { FloatingDockDemo } from "./Float_Icon";
+import { useSiteSettings } from "../hooks/use_site_settings";
 
 export function BackgroundBeamsWithCollisionDemo() {
+  const settings = useSiteSettings();
+  // settings.address keeps its line break as a literal "\n" (the schema's `text` field, not a structured
+  // object - architecture decision in 2.6, nothing ever parses an address programmatically) rather than
+  // hardcoding a <br/> for exactly two lines the way the live markup does today; splitting on "\n" renders
+  // correctly however many lines an editor actually enters, not just the two there happen to be right now.
+  const addressLines = settings.address.split("\n");
   return (
     (<BackgroundBeamsWithCollision>
       <div className="w-full h-full flex items-center justify-center">
@@ -45,9 +52,16 @@ export function BackgroundBeamsWithCollisionDemo() {
           <div className=" row-start-3 col-start-2 md:row-start-2 md:col-start-3">
             <div className="sm:mx-7  h-full w-full list-none flex flex-col items-start justify-center gap-3  text-white text-xl cursor-pointer">
               <li className="sm:my-4 text-gray-500">Get in touch</li>
-              <li>91+ 8271228935</li>
-              <li>rajrishav011@gmail.com</li>
-              <li>AnadamNagar Mahalaxmi PG <br /> Ramapuram, Chennai</li>
+              <li>{settings.phone}</li>
+              <li>{settings.email}</li>
+              <li>
+                {addressLines.map((line, i) => (
+                  <React.Fragment key={i}>
+                    {line}
+                    {i < addressLines.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </li>
             </div>
           </div>
         </div>
