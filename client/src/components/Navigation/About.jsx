@@ -1,12 +1,22 @@
 import  { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import { PortableText } from '@portabletext/react'
 import CustomImages from '../Form_&_Features/CustomImages';
 import { Separator } from '@/components/ui/separator'
 import { GoArrowUpRight } from 'react-icons/go';
 import images from '../../assets/index'
+import { useSiteSettings } from '../../hooks/use_site_settings'
+
+// Shared by all three aboutBio blocks below: the only mark the schema (Category 2.6) defines beyond the
+// defaults is `underline`, matching "creativity"/"quality"/"flexible" in the current copy - strong/em render
+// fine with PortableText's own built-in serializers, so only this one needs a custom component.
+const bioMarks = {
+  underline: ({ children }) => <span className='underline'>{children}</span>,
+}
 
 function About() {
 
+  const settings = useSiteSettings();
   const carouselRight = useRef(null);
   const carouselLeft = useRef(null);
   const carouselRightSet = useRef(null);
@@ -242,10 +252,10 @@ useLayoutEffect(() => {
         <div className='flex max-md:flex-wrap items-center justify-between h-full w-full'>
           <div className=' relative max-md:pt-14 max-md:pb-10    flex  flex-wrap items-center justify-center h-full w-full md:w-fit'>
 
-            <div className='md:-mt-24 |xl:-mt-20  px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-full text-xl md:text-2-4xl xl:text-4xl 4xl:text-5xl font-medium leading-1 '><li className='text-xl text-gray-600 mb-5 '>About me</li> <span className='text-blue-800'>Hi,</span>I'm an expert web designer and developer offering professional services.I create solutions that align with your vision and   business goals <span className={`font-bold md:text-4xl xl:text-5xl sm:text-3xl max-sm:text-2xl text-xl text-emerald-500`}>.</span></div>
+            <div className='md:-mt-24 |xl:-mt-20  px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60 h-full w-full text-xl md:text-2-4xl xl:text-4xl 4xl:text-5xl font-medium leading-1 '><li className='text-xl text-gray-600 mb-5 '>About me</li> <span className='text-blue-800'>Hi,</span><PortableText value={[settings.aboutBio[0]]} components={{ block: { normal: ({ children }) => <>{children}</> }, marks: bioMarks }} /> <span className={`font-bold md:text-4xl xl:text-5xl sm:text-3xl max-sm:text-2xl text-xl text-emerald-500`}>.</span></div>
           </div>
-          <div className="w-fit  flex flex-wrap items-center| md:justify-center"><div className="px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60"><div className="w-full relative  md:pt-16 pb-6 | lg:pt-24 lg:pb-10 | xl:pt-32 pr-10 | lg:pr-0  lg:pl-10"><h2 className="mb-3 text-pretty tracking-tight text-gray-700 | dark:text-grayDark-100 text-lg md:text-2-4xl xl:text-3xl 4xl:text-3xl leading-tight   ">With years of hands-on experience in web development, I bring <span className='underline'>creativity</span>, technical expertise, and a strong commitment to <span className='underline'>quality </span>.</h2>
-            <h2 className="mb-3 mt-5 text-pretty tracking-tight text-gray-700 | dark:text-grayDark-100 text-lg md:text-2-4xl xl:text-3xl 4xl:text-3xl leading-tight   ">I have worked with startups, entrepreneurs, and growing businesses. My approach is <span className='underline'>flexible</span> and dedicated to delivering results that make an impact .</h2></div></div></div>
+          <div className="w-fit  flex flex-wrap items-center| md:justify-center"><div className="px-2  | sm:px-6 | xl:px-12 | 2xl:px-20 | 3xl:px-40 | 4xl:px-60"><div className="w-full relative  md:pt-16 pb-6 | lg:pt-24 lg:pb-10 | xl:pt-32 pr-10 | lg:pr-0  lg:pl-10"><PortableText value={[settings.aboutBio[1]]} components={{ block: { normal: ({ children }) => <h2 className="mb-3 text-pretty tracking-tight text-gray-700 | dark:text-grayDark-100 text-lg md:text-2-4xl xl:text-3xl 4xl:text-3xl leading-tight   ">{children}</h2> }, marks: bioMarks }} />
+            <PortableText value={[settings.aboutBio[2]]} components={{ block: { normal: ({ children }) => <h2 className="mb-3 mt-5 text-pretty tracking-tight text-gray-700 | dark:text-grayDark-100 text-lg md:text-2-4xl xl:text-3xl 4xl:text-3xl leading-tight   ">{children}</h2> }, marks: bioMarks }} /></div></div></div>
         </div>
       </div>
 
