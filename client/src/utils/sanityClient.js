@@ -92,3 +92,22 @@ export function urlFor(source) {
     return null
   }
 }
+
+/**
+ * Resolves a Sanity image field to a plain `{ src, alt }`, or falls back to a locally-imported image when
+ * there is no usable Sanity image (not configured, field empty, asset missing, a malformed reference).
+ * Every content area ends up needing this same "CMS image or the built-in one" choice (Category 3's
+ * siteSettings.contactImage first, then every image field Category 4 wires up) - one function here means
+ * every caller resolves it the same way instead of re-deriving the same three-way fallback locally.
+ *
+ * @param {unknown} sanityImage a Sanity image field's value (or null/undefined)
+ * @param {string} fallbackSrc an already-imported local image
+ * @param {string} fallbackAlt alt text to use with the fallback, or with the Sanity image if it has none
+ */
+export function resolveImage(sanityImage, fallbackSrc, fallbackAlt) {
+  if (sanityImage) {
+    const builder = urlFor(sanityImage)
+    if (builder) return { src: builder.url(), alt: sanityImage.alt || fallbackAlt }
+  }
+  return { src: fallbackSrc, alt: fallbackAlt }
+}
