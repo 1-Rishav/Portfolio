@@ -681,3 +681,203 @@ From 3.2 onward, every task was verified beyond lint and build: server-rendering
 No content exists in any dataset yet - that's still task 1.5 (the owner's own Sanity project setup) plus either manual entry or Category 5's seed script. The site's actual behavior right now, fallback included, is unchanged from before this category - everything renders through the same fallback content that already matched what was live, which is the entire point of architecture decision 13.
 
 **Next: Category 4 — Repeatable List Migration**, whenever the user is ready.
+
+### Session 16 — CMS Category 4, task 4.1: foundation (`useSanityList()` hook) — plus a pre-existing build break found along the way
+
+**Starting point:** same `Portfolio_2.zip` baseline Session 15 ended on (Category 1-3 complete). Before writing anything: read `use_site_settings.jsx` and `sanityClient.js` in full, plus every Category 4 consumer (`CustomImages.jsx`, `FAQ.jsx`/`FAQData.js`, `FeatureComponent.jsx`/`Develop_DesignData.js`, `Develop_Service.jsx`, `Design_Service.jsx`, `About.jsx`'s ticker section, `HeroParalax.jsx`/`hero_paralax.jsx`, `TimeLineData.jsx`/`ui/timeline.jsx`, `Carousel.jsx`/`ProjectDescription.jsx`) and the relevant schema files.
+
+**Design, generalizing `useSiteSettings`'s module-level-cache pattern (3.1) from one singleton document to N distinct list queries:**
+- Cache keyed by the query string itself, not a separate params object - every Category 4 filter (`page == "develop"`, `sectionKey == "design-hero"`, etc.) is a fixed string known at the call site, so there's no runtime-parameter case to support, and a string key avoids the `JSON.stringify`-an-object-for-`useEffect` workaround an object-keyed cache would need.
+- A successful fetch that resolves to an empty array is treated the same as "nothing yet," not "the real answer is zero items" - during migration, a half-populated dataset should keep showing the known-good fallback for a not-yet-populated list, not go blank.
+- Same "active flag, not AbortController" unmount guard as `useSiteSettings`, for the same reason: the fetch/promise is shared across every component asking for that exact query (Develop_Service.jsx and Design_Service.jsx will both read `serviceShowcaseProject`, 4.5), so one consumer unmounting must not cancel a request others are still waiting on.
+- Same no-retry-this-session behavior as `useSiteSettings`, for the same reason: a mount-triggered retry could mean hammering a misconfigured or unreachable endpoint on every mount.
+
+**Found while reading the plan against the real components, not part of 4.1's own work:** `sectionIntro` (2.9) has 4 instances, but the original Category 4 bullets never assigned Develop/Design's hero-media instances to any task. Numbered Category 4's tasks (4.1-4.9, matching the Category 2/3 convention) and added task 4.6 to cover them - full reasoning in the plan doc. Also flagged inline there, for when each task is actually worked rather than now: 4.4's `services` array-of-strings-to-`{id,service}` transform, 4.8's checklist-vs-images shape and whether the ✅ is content or a CSS `::marker`, and 4.9's chance to collapse `ProjectDescription.jsx`'s 4 near-identical components into 1.
+
+**Built:** `client/src/hooks/use_sanity_list.jsx` - `useSanityList(query, fallback)`. Nothing imports it yet, the same position `sanityClient.js` was in when Category 1 first built it - the live site is unaffected until 4.2 starts consuming it.
+
+**A pre-existing build break, found during verification, not caused by this task:** `npm run build` fails on this zip as uploaded - `client/src/assets/Images/` (19 files: `Project1`-`Project10`, `Rishav1`-`Rishav6`, the two project logos) is missing, but `assets/index.js` imports all 19 as real ES modules, not public-folder string paths, so Vite can't resolve them and the build fails before touching anything of mine. This is almost certainly the "Images" the user's own upload message mentioned removing - the five other asset folders (`Skills`, `Web3`, `GemXImages`, `QuickFundzImages`, `ProgrammingImages`) made it into this zip; this one didn't. Confirmed it's the *only* blocker, not something hiding behind it, by temporarily stubbing all 19 paths with placeholder bytes in a sandbox-only copy, rebuilding (succeeded - 341 modules, the new hook included with zero errors), then deleting the stub immediately after; it was never committed and isn't part of anything described as "built" here. **Needs the real files in a future zip before `npm run build` can verify anything else in this project** - 4.9 (Home's featured-project cards) depends on this same folder.
+
+**Verification:** `npm run lint` - 68 problems (55 errors, 13 warnings), identical with and without the new file (confirmed by removing it and re-running, not assumed from Session 14/15's "70" - a fresh `npm install` in this sandbox landed on slightly different transitive versions; 68 is this environment's real baseline, not a regression). `npm run build` - fails on the pre-existing `Images/` gap above; succeeds once that gap is bridged (diagnostic stub only, see above), with the new hook compiling cleanly as part of that run. `diff -r` against the Session 15 baseline - only `use_sanity_list.jsx` is new; `docs/CMS_INTEGRATION_PLAN.md` changed (the numbering above); nothing else touched, `server/` included.
+
+**Not done in this task:** nothing consumes the hook yet - no component calls `useSanityList()`. That starts at 4.2.
+
+**Next:** 4.2 (About's Skills and Web3 tickers) - the first real consumer of the hook - whenever you're ready. Worth a decision first: are the real `Images/` files available for a future zip, or should 4.9 just wait on them whenever we get there?
+
+### Session 16 (continued) — CMS Category 4, task 4.2: About's Skills ticker, Web3 ticker
+
+**Starting point:** confirmed via `git log`/`git status`/the plan doc before writing anything - only 4.1 existed, nothing from this task had started (checked rather than assumed, same discipline as every session so far). Re-read `skillTickerItem.js`/`web3TickerItem.js`/the shared `tickerImageSchema()` directly rather than from memory, since the exact field names matter for the query.
+
+**A decision beyond the DRY note's "just call the hook":** the schema's `image` field carries a required, real `alt` string - explicitly meant to replace `CustomImages.jsx`'s current generic `custom-img-${index}` alt text (the shared schema file's own comment says so). But `CustomImages.jsx` is also used by Develop_Service.jsx and Design_Service.jsx (4.5, not yet migrated), which still pass plain URL-string arrays - changing its contract outright would break them before their own task gets there. Rather than leave the real alt text unused this task (simplest, but wastes what the schema was built for) or touch Develop/Design's call sites now (out of scope for 4.2, and against the one-task-at-a-time rule), `CustomImages.jsx` now accepts either shape - a plain string (today's other two callers) or `{src, alt}` (About, from this task on) - a deliberate, named transitional state, not a silent inconsistency. Once 4.5 migrates the other two callers it becomes the only shape in use and the branch comes out.
+
+**Built:**
+- `client/src/components/Navigation/About.jsx` - `SKILL_TICKER_QUERY`/`WEB3_TICKER_QUERY`, each passed to `useSanityList()` with a same-length `{image: null}` array as the fallback shape; the result mapped through `resolveImage()` against the original `webImages`/`Web3Images` entries (now the per-image local fallback source, not the rendered array directly). Both tickers' double-copy JSX (4 `<CustomImages>` call sites, for the seamless-loop trick) now render the resolved arrays.
+- `client/src/components/Form_&_Features/CustomImages.jsx` - accepts a string or a `{src, alt}` object per entry, as above.
+
+**Verification:** `npm run lint` - 68, identical to 4.1's baseline; confirmed by diffing lint output against the pre-4.2 commit directly (not just the total count) - the only lines touching either changed file are the same 4 pre-existing issues (`CustomImages.jsx`'s `React`-unused-import and `images` prop-type gap; `About.jsx`'s `videoRef` cleanup warning and one unescaped apostrophe), shifted by the lines this task added, not new ones. `npm run build` - succeeds (diagnostic `Images/` stub again, see 4.1; unrelated to this task). Beyond lint/build: loaded the real `sanityClient.js` and the real asset module through Vite's own `ssrLoadModule` (so `import.meta.env` resolves exactly as it does for the real app, sidestepping the same tooling gap 3.3 hit) and ran this task's exact fallback logic against them in a throwaway script, deleted immediately after, never committed - confirmed unconfigured Sanity is correctly detected, and all 12 skill + 10 web3 entries resolve to the exact original image path and the expected `custom-img-N` alt text, not just that the code compiles. `diff -r` against the 4.1 commit - only the two files above changed.
+
+**Not done in this task:** the ticker's own animation mechanics (`setupCarousel`, the GSAP loop) - untouched, only the data source changed. `CustomImages.jsx`'s dual-shape branch stays until 4.5.
+
+**Next:** 4.3 (Contact's FAQ list) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.3: Contact's FAQ list
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1 and 4.2 existed. Re-read `FAQ.jsx`, `FAQData.js` and `faqItem.js` fresh rather than from memory.
+
+**Simpler than 4.2, genuinely - not just described that way:** `faqItem` is two plain strings and a display order, no image to resolve. `FAQData.js`'s `faq` array is used by exactly one file (checked with a repo-wide grep before touching it, not assumed), so there was no multi-caller reason to keep its old field name around the way `CustomImages.jsx` had to in 4.2 - `title` was renamed to `question` directly in the data file to match the schema (the schema's own field description already called this the more accurate name), and the fallback passed to `useSanityList` is that same array, unmodified, no per-item mapping function needed.
+
+**Built:**
+- `client/src/components/Data/FAQData.js` - `title` -> `question` on all 6 entries (`id`/`answer` untouched).
+- `client/src/components/Form_&_Features/FAQ.jsx` - `FAQ_QUERY`, `useSanityList(FAQ_QUERY, faq)`, rendering `faqItems` instead of `faq` directly; the accordion's key switched from `query.id` to the array index, since a fetched Sanity document doesn't carry that small integer id and the list is display-order-sorted and swaps wholesale (fallback to real) rather than reordering in place, so index is a safe, simple choice here instead of carrying two different id schemes through one key.
+
+**Verification:** `npm run lint` - 68, identical before/after (stashed this task's diff and re-ran to confirm directly, same as 4.2's method), and neither changed file appears in the output at all, not just an unchanged total. `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap as 4.1/4.2, still unrelated). Beyond lint/build: imported the real `FAQData.js` directly (no Vite SSR shim needed this time - it's a plain ES module with no `import.meta.env` dependency, unlike 4.2's `sanityClient.js`) and confirmed all 6 entries carry a non-empty `question` and `answer` - the exact shape the fallback now hands to `useSanityList` and, from there, straight into the accordion. `diff -r` against the 4.2 commit - only the two files above changed.
+
+**Not done in this task:** the Accordion's own rendering/styling - untouched, only the data source and the field rename.
+
+**Next:** 4.4 (Develop/Design Services' name lists, `serviceGroup`) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.4: Develop/Design Services' name lists
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.3 existed. Re-read `serviceGroup.js`, `Develop_DesignData.js`, `FeatureComponent.jsx`, and both service pages' exact current `FeatureComponent` calls fresh.
+
+**Wider in scope than the plan bullet's own wording, for a reason recorded in the schema itself, not assumed:** the plan originally described this task as just the services list needing an `{id,service}` transform. But `serviceGroup.js`'s own comment says heading, subheading, the services list and the trailing accent character "travel together as one editorial unit, not as a floating list plus a disconnected heading" - a deliberate schema decision, not an oversight to leave for later. Reading the actual `FeatureComponent` calls confirmed why: the subheading text is identical across Develop/Support (literally the same string, copy-pasted) and the accent character isn't always "." - Design's "Other" group uses "!", a genuine content difference FeatureComponent already takes as a prop (`end`), not something hardcoded in the component itself. So this task wires the whole `serviceGroup` document, not just its `services` field.
+
+**Found along the way, logged not fixed, in `docs/UI_ISSUES_REPORT.md` (#7):** Design page's heading is `" Design"` with a leading space - every other heading (Develop/Support/Other) has none. Carried over unchanged into the new fallback data for the same reason as #5/#6 there - a migration isn't the moment to silently correct content.
+
+**Built:**
+- `client/src/components/Data/Develop_DesignData.js` - all 4 exports restructured from `{id,service}[]` arrays into `{heading, subheading, accentChar, services: string[]}` objects, matching the schema field-for-field. `services` dropped the `id` (array index now supplies it at render time, same as 4.3's FAQ key).
+- `client/src/components/Navigation/Develop_Service.jsx` / `Design_Service.jsx` - one `DEVELOP_GROUPS_QUERY`/`DESIGN_GROUPS_QUERY` each (`serviceGroup` filtered by `page`, ordered by `displayOrder`), one `useSanityList()` call returning both of that page's groups as a 2-item array, both `FeatureComponent` calls now reading `heading`/`subheading`/`end` from `groups[0]`/`groups[1]` instead of hardcoded JSX props, with `services.map((name, index) => ({id: index + 1, service: name}))` supplying the `service` prop. Optional-chained (`groups[0]?.heading`, `(groups[0]?.services ?? [])`) so a mismatched document count in Sanity (e.g. an editor accidentally publishing a 3rd or deleting one of the 2 expected groups for a page) degrades to a missing section instead of a crash - the first defensive guard added in Category 4, because this is the first task where the fallback and real data are both *lists of a fixed, assumed count* rather than a single document or an open-ended list.
+
+**Verification:** `npm run lint` - 68, identical before/after (stashed/compared directly); the one finding in a touched file (`Develop_Service.jsx`'s unused `React` import) confirmed present in the stashed pre-4.4 run too, at the same line. `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap). Beyond lint/build: imported the real `Develop_DesignData.js` directly (plain ESM, no Vite shim needed) and checked every group's heading/accentChar/service-count/first-service-name against the original hardcoded values, byte-exact subheading comparison included, and replicated the exact `{id,service}` transform to confirm it preserves order and 1-based numbering - not just that the file parses. `diff -r` against the 4.3 commit - the two service pages, the data file, and `docs/UI_ISSUES_REPORT.md` changed; nothing else.
+
+**Not done in this task:** `FeatureComponent.jsx` itself - untouched, its existing `tech.service ?? tech.feature` fallback already covers the shape this task produces without needing a change (and was already anticipating Category 6's reuse for Mern/Pern).
+
+**Next:** 4.5 (Develop/Design Services' shared project showcase ticker, `serviceShowcaseProject`) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.5: Develop/Design's shared project showcase ticker
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.4 existed. Re-read `serviceShowcaseProject.js`, both pages' `DevelopImages`/`ProjectImages` arrays, and both pages' `CustomImages` call sites fresh, including a repo-wide grep for every `<CustomImages` call site (not just the two pages in this task's name) to be sure nothing else was quietly relying on the old plain-string shape before removing it.
+
+**A genuinely shared list, not duplicated logic in two files:** the schema's own comment calls `DevelopImages`/`ProjectImages` "the exact same 12 images in the exact same order... genuinely one set of content shown twice, not two sets that happen to look alike." Rather than define the same query string and the same resolveImage-mapping logic separately in `Develop_Service.jsx` and `Design_Service.jsx` (correct, since useSanityList's cache is keyed by the query string's value either way - the two pages would still share one network request - but a maintenance risk, since nothing would stop the two copies drifting apart later), both now call one new hook, `useServiceShowcaseImages()`, that owns the query and the mapping once. This is the first hook this migration has added beyond `use_sanity_list.jsx` and `use_site_settings.jsx` themselves.
+
+**`CustomImages.jsx`'s transitional dual-shape branch, added in 4.2, comes out now as planned:** a repo-wide check confirmed every live call site (About's two tickers, both pages' showcase ticker) passes a resolved `{src, alt}` pair; the one remaining call using the old `img1=/img2=...` signature is inside a commented-out JSX block in `Develop_Service.jsx`, already dead code, untouched.
+
+**Built:**
+- `client/src/hooks/use_service_showcase_images.jsx` (new) - the shared query, the fallback array (the old `DevelopImages`/`ProjectImages` list, unchanged), and the resolveImage mapping, exactly mirroring 4.2's per-ticker logic but written once.
+- `client/src/components/Navigation/Develop_Service.jsx` / `Design_Service.jsx` - `DevelopImages`/`ProjectImages` removed (now dead, replaced by the hook), both pages' two `CustomImages` calls each read from the hook's result instead.
+- `client/src/components/Form_&_Features/CustomImages.jsx` - the `typeof img === "string"` branch from 4.2 removed; always destructures `{src, alt}` now.
+
+**A real lint regression, caught and fixed before moving on, not left for later:** removing `ProjectImages` from `Design_Service.jsx` left its `import images from '../../assets/index'` unused (confirmed with a grep - nothing else in that file reads `images.*`), which lint caught as a new `no-unused-vars` error (69, up from 68) the first time I ran it after the edit. `Develop_Service.jsx` didn't have the same problem - it still uses `images` for its own hero rotating-image set, 4.6's concern, untouched here. Removed the dead import and re-ran lint to confirm 69 dropped back to 68 before treating this task as done.
+
+**Verification:** `npm run lint` - 68, confirmed via the fix above and a final stash-based A/B same as every prior task. `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap). Beyond lint/build: loaded the real `sanityClient.js` and real asset module through Vite's SSR loader (same technique as 4.2) and confirmed all 12 showcase images resolve to the exact original path and the expected alt text.  `diff -r` against the 4.4 commit - the new hook, both service pages, and `CustomImages.jsx`; nothing else.
+
+**Not done in this task:** the ticker's own GSAP/`buildLoop` mechanics in either page - untouched, only the data source.
+
+**Next:** 4.6 (Develop/Design hero media via `sectionIntro` - Develop's rotating image set, Design's video) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.6: Develop/Design hero media
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.5 existed. Interrupted partway through (imports and the query constant landed on `Develop_Service.jsx` before the pause); verified exactly what existed via a targeted grep rather than assuming, then finished from there rather than restarting. Re-read `sectionIntro.js` fresh.
+
+**A second kind of DRY hook, not another `useSanityList` call:** `sectionIntro` returns one document per `sectionKey`, not a list to map over - wrapping that single result in `useSanityList`'s array (every caller reading `result[0]`) would work but reads oddly, and copying `useSiteSettings`' singleton-fetch logic once per sectionKey would duplicate it three more times over Category 4. Built `use_sanity_document.jsx` instead: `useSiteSettings`'s own module-level-cache pattern (3.1) made reusable for any single-document query, the same relationship `useSanityList` (4.1) already has to it. `useSiteSettings.jsx` itself is untouched - it already works and is already verified, and rewriting it on top of this hook would be a pure DRY exercise, not something this task needs.
+
+**A real accessibility regression caught before it shipped, not after:** the first pass used the same per-image fallback-alt pattern as 4.2's tickers (`` `develop-hero-image-${index}` ``). But Develop's hero `<img>` originally had `alt=""`, not a generic label - empty alt is the correct way to mark a purely decorative image so screen readers skip it, unlike the tickers' *already-generic* `custom-img-N` alt that genuinely needed replacing. Caught on review before verification, not by lint (which doesn't check this): the fallback alt is `''`, matching the original markup exactly; only once a real document exists (the schema requires real alt text on every image) does a meaningful description take over.
+
+**Built:**
+- `client/src/hooks/use_sanity_document.jsx` (new) - `useSanityDocument(query, fallback)`.
+- `client/src/components/Navigation/Develop_Service.jsx` - `DEVELOP_HERO_QUERY` (`sectionKey == "develop-hero"`, `images` only), resolved the same way as 4.2/4.5's tickers but through the new document hook instead of the list hook; the rotation `useEffect`'s dependency array changed from `[]` to `[heroImages.length]` so it re-subscribes if the real document's image count ever differs from the 8-image fallback, instead of staying closed over a stale length from first render.
+- `client/src/components/Navigation/Design_Service.jsx` - `DESIGN_HERO_QUERY` (`sectionKey == "design-hero"`, `video` only), no resolveImage step needed (a plain url field) - `designHero.video` replaces the hardcoded `src`.
+
+**Verification:** `npm run lint` - 68, identical before/after (stashed/compared, same as every prior task). `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap, still waiting on the user's future upload). Beyond lint/build: loaded the real `sanityClient.js` and real asset module through Vite's SSR loader and confirmed all 8 hero images resolve to their original paths with `alt === ''` specifically (not just "truthy"), plus confirmed the video fallback string matches the original hardcoded path exactly. `diff -r` against the 4.5 commit - the new hook and the two service pages; nothing else.
+
+**Not done in this task:** the hero rotation timer's visual behavior and the video's IntersectionObserver play/pause - both untouched, only their data sources.
+
+**Category 4 progress: 6 of 9 tasks done (4.1-4.6).** Remaining: 4.7 (Home hero parallax), 4.8 (Home timeline, including `sectionIntro`'s home-timeline journey years), 4.9 (Home featured project cards - needs the real `Images/` folder for anything beyond the fallback path, per 4.1's finding).
+
+**Next:** 4.7 (Home's hero parallax products, `heroProject`) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.7: Home's hero parallax products
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.6 existed. Interrupted once mid-verification (the logic check had passed, lint/build/docs were still pending); verified the exact state via `git status` and the plan doc before resuming, rather than re-doing or guessing what was already confirmed. Re-read `heroProject.js`, `HeroParalax.jsx`, and `ui/hero_paralax.jsx`'s `ProductCard` fresh.
+
+**Two things the schema defines that the current code doesn't use, found by reading `ProductCard` itself, not assumed from the schema alone:**
+- `thumbnail.alt` - a required field, but `ProductCard` currently builds its `<img alt>` from `product.title` instead, so nothing would ever read an editor's alt text. `ProductCard` now takes `thumbnail` as a resolved `{src, alt}` pair (updating `ui/hero_paralax.jsx`'s `productShape` PropTypes to match) and uses `thumbnail.alt`; `resolveImage`'s fallback-alt argument is `title`, so the fallback path's alt is identical to today's (`title`) while a real document's own alt text takes over once one exists - the same "fallback behavior unchanged, real data gets the richer field" split as 4.6.
+- An empty `link` - the schema's own description explains today's `"#"` placeholder is meant to become an empty field, since a photo-only card has nothing to link to. `products`' four `"Rishav"` entries now store `link: null`, and `ProductCard` defaults `to={product.link || '#'}` at render time - the `"#"` becomes a render-time default for "no link," not stored content, while still producing the exact same click behavior as today's literal `"#"`.
+
+**Found along the way, logged not fixed, in `docs/UI_ISSUES_REPORT.md` (#8):** the "VeggieFeast" hero card title is `" VeggieFeast"` with a leading space - the same pattern as 4.4's Design heading (#7). Carried over unchanged into the data for the same reason.
+
+**Built:**
+- `client/src/components/HeroParalax.jsx` - `HERO_PRODUCTS_QUERY`, `useSanityList()` with a fallback where each item already carries its real `title`/`link` (only `thumbnail` is nulled, needing resolveImage) - so `doc.title`/`doc.link` read correctly whether `docs` is the fallback or real Sanity data, no source-branching needed; `products`' `link: "#"` values changed to `null` for the four photo cards.
+- `client/src/components/ui/hero_paralax.jsx` - `ProductCard` and `productShape` updated for the `{src, alt}` thumbnail and the nullable `link`, as above. The parallax motion, row-splitting and hover mechanics - untouched.
+
+**Verification:** `npm run lint` - 68, identical before/after (stashed/compared; `HeroParalax.jsx`'s one warning - mixing a component and a constant export in one file, a `react-refresh` lint rule - confirmed present before this task too, same file, different line). `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap; this is the first task where the fallback images themselves - `Rishav1/3/5/6`, `Project1-4` - are literally the ones affected by that gap, not just coincidentally sharing a barrel file with it). Beyond lint/build: hit a genuine tooling wall this time, not a code issue - `HeroParalax.jsx` imports `ui/hero_paralax.jsx`, which imports `react-router-dom`'s `Link`, and Vite's bare SSR module loader (unlike the real `dev`/`build` pipeline) can't resolve react-router-dom's CommonJS named exports; tried `ssr.noExternal` to force it to bundle, which traded that error for a different one (`module is not defined`) rather than fixing it. Worked around it by verifying the data-shaping logic directly - loaded the real `sanityClient.js` and real asset module, and transcribed `products` from the real file (sed-extracted immediately before writing the check, not from memory) rather than importing the file that pulls in the problematic dependency - confirmed all 8 cards' title/link/thumbnail.src/thumbnail.alt, the preserved leading-space typo, and the render-time `"#"` default, all against the real `resolveImage`. `diff -r` against the 4.6 commit - the two files above; nothing else.
+
+**Not done in this task:** the parallax scroll/motion mechanics, the row-splitting (`firstRow`/`secondRow`/`thirdRow`) - all untouched, only the two fields' data source and shape.
+
+**Next:** 4.8 (Home's timeline grid, `timelineProject`, plus `sectionIntro`'s Home-Timeline journey years) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.8: Home's timeline grid
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.7 existed. Interrupted once right after a verification attempt failed on a tooling issue; checked state and continued the SAME verification problem from there rather than restarting the task. Re-read `timelineProject.js`, `linkedImage.js`, and both `TimeLineData.jsx`/`ui/timeline.jsx` in full, fresh.
+
+**Resolved two open questions from 4.1 by reading, not guessing:**
+- *Is the ✅ checklist content or presentation?* The schema's own comment says every entry gets the same two fields (`description`, `highlights`) specifically so the checklist "fits without a special case" - meaning the bullet list itself is the mechanism, not a one-off. Went with presentation: `listItem.bullet` adds the ✅, the stored text is just "Version control and collaborate efficiently" etc. Same content-vs-presentation split as every other styling decision so far (architecture decision 12).
+- *Does the timeline's intro paragraph become CMS content too, since `sectionIntro`'s `tagline` field description mentions "Home - Timeline"?* Checked the actual resolution in the 2.9 session log rather than taking the field description at face value: "the heading keeps its text in the component... but the two numbers inside it come out as fields." Only `journeyStartYear`/`journeyEndYear` are wired; the heading's surrounding words and the whole intro paragraph stay exactly as hardcoded text, same as decision 12's default for every other borderline case not given its own explicit reason.
+
+**Found along the way, logged not fixed, in `docs/UI_ISSUES_REPORT.md` (#9):** the 3rd timeline entry's title is `"Node.js , MongoDB & PostgreSQL"` with a space before the comma. Carried over unchanged, same reasoning as #7/#8.
+
+**Built:**
+- `client/src/components/TimeLineData.jsx` - `TIMELINE_QUERY` and `TIMELINE_INTRO_QUERY`, the 4 entries' text transcribed as real Portable Text blocks (fallback, same shape Sanity would return), a `descriptionComponents` object for `<PortableText>` (custom `block.normal`, `list.bullet`, `listItem.bullet`), and the highlights grid rebuilt from `resolveImage()`'d entries instead of hardcoded JSX. `ui/timeline.jsx` itself stays on its existing `{item.content}` contract - unlike 4.7, where the generic component genuinely needed new fields, here `TimeLineData.jsx` alone could absorb all of this by building `content` dynamically instead of statically, so the DOM structure PortableText produces matches the original JSX almost exactly.
+- `client/src/components/ui/timeline.jsx` - `journeyStartYear`/`journeyEndYear` props, used only for the two numbers inside the otherwise-unchanged heading (`My Tech Journey ({start}-{end || 'Present'})`); `'Present'` for a future editor leaving the end year blank, matching the schema's own documented convention, not yet exercised by the fallback (`2022`/`2025`, matching today's text exactly).
+
+**A deliberate, minor simplification, not an oversight:** the 4 entries' last paragraph originally had different bottom margin depending on what followed it (`mb-8` before an image grid, `mb-4` before the checklist, which supplied its own spacing). One shared `block.normal` renderer can't easily vary by what comes next without extra bookkeeping for what's practically a ~4px difference, so it's `mb-8` everywhere now - noted in the code, not silently different.
+
+**A real pre-existing gap closed, not just avoided, while already in the file:** `ui/timeline.jsx` had no `PropTypes` at all before this task (`data`/`data.map` were already flagged). Adding `journeyStartYear`/`journeyEndYear` as plain destructured props would have added 2 more of the same error; added a full `Timeline.propTypes` instead (covering `data` too), closing the pre-existing gap rather than leaving it next to new, correctly-typed props.
+
+**Verification:** `npm run lint` - 66, DOWN from 68 (confirmed via stash-based A/B as every task) - 2 fewer than the baseline, not just unchanged, from the `PropTypes` fix above. `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap). Beyond lint/build, the most thorough check this category has used yet: hit the same kind of Vite-SSR-only wall as 4.7 (trying to load `react`/`react-dom/server` directly via `ssrLoadModule` from outside Vite's own module graph failed with "module is not defined") - worked around it properly this time by writing a tiny diagnostic entry file inside `client/src` that imports `react-dom/server` normally (so Vite's real SSR dependency resolution applies), loading *that* file instead, then deleting it immediately after. Used `renderToStaticMarkup()` to actually render `TimelineDemo()` and checked the real output HTML: the heading's year range, both of entry 2's paragraphs, all 3 checklist items with exactly 3 checkmarks (not more, not fewer), exactly 10 `<img>` tags across all 4 entries (4+4+2+0, matching the original counts), all 10 images' alt text unchanged, and specific highlight links landing on the right URLs. One assertion failed on a technicality worth recording: checking for the literal `&` in "MongoDB & PostgreSQL" failed because `renderToStaticMarkup` correctly HTML-escapes it to `&amp;` - confirmed by inspecting the actual output directly rather than assuming a bug, which it wasn't. `diff -r` against the 4.7 commit - the two files above; nothing else.
+
+**Not done in this task:** the timeline's scroll-driven line-fill animation (GSAP/framer-motion) - untouched, only the per-entry content and the heading's two numbers.
+
+**Category 4 progress: 8 of 9 tasks done.** Only 4.9 (Home's featured project cards) left - and that one needs the real `Images/` folder for more than just verification, per 4.1/4.7's findings.
+
+**Next:** 4.9 (Home's featured project cards, `featuredProject`) - whenever you're ready.
+
+### Session 16 (continued) — CMS Category 4, task 4.9: Home's featured project cards — Category 4 complete
+
+**Starting point:** confirmed via `git log`/`git status` before writing anything - only 4.1-4.8 existed. The user's message this task opened with described their local `Images/` folder as now having 18 files, but no zip came with it - checked the sandbox directly (`ls client/src/assets/`) rather than taking the description at face value, and the folder genuinely isn't there yet, same as every check since 4.1. Flagged this to the user rather than silently building against it or silently ignoring what they'd said. Re-read `featuredProject.js`, `Carousel.jsx`, and all 4 of `ProjectDescription.jsx`'s exports in full, fresh.
+
+**Confirmed by reading, not assumed from the schema comment:** `ProjectDescription.jsx`'s 4 components really were one identical layout with different data - same wrapper, same bold-intro-span, same "GitHub:"/"WebSite:" labels and code blocks, same image placement. Checked the specific claim in the schema's own comment too (only GemX's detail image differs from its card image) against the actual files: `Gem2` (GemX's detail image) vs `Project2` (its card image) - different; QuickFundz/Advertise/GeoPix's detail images were each identical to their own card image. Confirmed, not assumed.
+
+**Built:**
+- `client/src/components/Form_&_Features/ProjectDescription.jsx` - replaced with one component, `FeaturedProjectContent({description, githubUrl, websiteUrl, image})`. `githubUrl`/`websiteUrl` are each optional in the schema (unlike every other URL field wired so far in this category, both are allowed to be absent independently), so each of the two "label + code block" lines is now conditional, not just always rendered - not exercised by today's 4 projects (every one has both), but correct for a future project with only one.
+- `client/src/components/Carousel.jsx` - `FEATURED_PROJECTS_QUERY`, `useSanityList()`, each document mapped to a card: `src` (the collapsed card's thumbnail) resolved from `cardImage`, `content` built as `<FeaturedProjectContent>` with `detailImage || cardImage` resolved for its image - reproducing the schema's "leave empty to reuse the card image" rule with one `||`, not a special case. `key={card.src}` (the old data's own id, a plain string) became `key={card.title}`, since a resolved image is now an object - keying a list by a value that's about to become unstable, the same risk 4.7's `thumbnail` change didn't have.
+- `client/src/components/ui/apple_card_carousel.jsx` - `Card`'s `src`/`alt` now read from the resolved `{src, alt}` pair instead of a plain string + `card.title`, and its `PropTypes` updated to match - the same previously-unused-schema-alt-text gap 4.7 found in `ProductCard`, found here by the same method (reading the actual render code, not assuming from the schema).
+
+**Found along the way, logged not fixed, in `docs/UI_ISSUES_REPORT.md` (#10):** Brand-Fusion's description is missing a space - "...responsive layouts.Its real purpose...". Carried over unchanged, same reasoning as #7/#8/#9.
+
+**Verification:** `npm run lint` - 66, identical before/after (stashed/compared; the 3 warnings in `apple_card_carousel.jsx` confirmed pre-existing at the same lines in both runs). `npm run build` - succeeds (diagnostic `Images/` stub, same pre-existing gap, still not resolved). Beyond lint/build: a genuine, useful false alarm during this task's own check, written up rather than silently corrected - the first rendering attempt (same technique as 4.8) checked the *opened* card's content for description text, URLs and image counts, and nearly every one of those checks failed. Not a bug: `Card`'s expanded content only renders when `open` (a `useState`) is `true`, which a static server render can never be, so `renderToStaticMarkup` only ever sees the *collapsed* view - confirmed by re-checking just the collapsed view (passed completely: exactly 4 `<img>` tags, correct alt, correct card image reference) and separately rendering `FeaturedProjectContent` directly with the same data `Carousel.jsx` would pass it (also passed: description, both labels, both URLs present as syntax-highlighter tokens rather than one contiguous string - confirmed directly rather than assumed - and the correctly-distinct GemX detail image). `diff -r` against the 4.8 commit - the three files above, plus `docs/UI_ISSUES_REPORT.md`.
+
+**Not done in this task:** the carousel's scroll-driven header animation and the card-open/-close motion/interaction logic - untouched, only each card's data source and shape.
+
+## Category 4 complete
+
+All 9 tasks done (4.1-4.9). Every repeatable list in the client - both
+service pages' tickers and name lists, the FAQ, the Home hero/timeline/
+featured cards - now reads from Sanity with the original hardcoded content
+as its fallback, the same fallback-first guarantee Categories 1-3 already
+established for the site's singleton content. The live site is unchanged
+until task 1.5 (still the user's own step) puts real content in front of
+any of it.
+
+**One gap does not carry that guarantee, flagged again rather than glossed
+over:** `client/src/assets/Images/` has been missing from every zip since
+4.1 first found it, and this session's `Images/`-dependent tasks (4.7's
+hero photos, 4.9's featured-project screenshots) have only ever been
+verified against a temporary, non-shipped stub - never the real files.
+`npm run build` will not succeed on a real checkout, including whatever
+zip comes out of this session, until that folder is actually back in one.
+
+**Next: Category 5 — Media Asset Migration**, whenever the user is ready -
+uploading real images/video into Sanity and swapping local imports for
+`urlFor()`, which is also where `client/src/assets/Images/` and the rest of
+`client/src/assets/` stop being needed locally at all.
