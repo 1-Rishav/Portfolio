@@ -84,6 +84,47 @@ for Category 3.1 and carried over unchanged for the same reason as #5.
 
 ---
 
+## Found during Category 4 (not from the original audit above)
+
+### 7. Design page's heading has a leading space: " Design"
+`client/src/components/Navigation/Design_Service.jsx`, the first
+`FeatureComponent` call (`heading=" Design"`): every other `FeatureComponent`
+heading across both service pages (`Develop`, `Support`, `Other`) has no
+leading space - this one does, visible as the heading sitting very slightly
+off its left edge compared to the other three. Noticed while migrating this
+value into `Develop_DesignData.js` for Category 4.4's `serviceGroup` wiring;
+carried over unchanged into the new fallback data for the same reason as #5/
+#6 above - a data-source migration isn't the moment to silently correct
+content, so it still renders exactly as it does today either way.
+
+### 8. Home hero card title has a leading space: " VeggieFeast"
+`client/src/components/HeroParalax.jsx`, the `products` array (hero
+parallax card #6) - the same pattern as #7: every other hero card title
+(`Rishav` x4, `GemX`, `QuickFundz`, `Brand Fusion`) has no leading space,
+this one does. Shows briefly on hover as the card's title. Noticed while
+migrating `products` for Category 4.7's `heroProject` wiring; carried over
+unchanged for the same reason as #7.
+
+### 9. Timeline entry title has a space before its comma: "Node.js , MongoDB & PostgreSQL"
+`client/src/components/TimeLineData.jsx`, the 3rd timeline entry's title -
+every other title in the same list (`HTML,CSS & JavaScript`, `React.js`,
+`GitHub, Vercel & Render`) punctuates normally; this one has `Node.js ,`
+with a space before the comma. Shows on both the desktop and mobile
+heading for this entry. Noticed while migrating `timelineFallback` for
+Category 4.8's `timelineProject` wiring; carried over unchanged for the
+same reason as #7/#8.
+
+### 10. Brand-Fusion's description is missing a space: "...responsive layouts.Its real purpose..."
+`client/src/components/Carousel.jsx`'s `featuredProjectsFallback` (formerly
+`ProjectDescription.jsx`'s `Advertise` component) - "layouts.Its" runs the
+sentence into the next one with no space after the period, unlike every
+other description in the same carousel. Shows in the opened card for the
+Brand-Fusion project. Noticed while migrating this description for Category
+4.9's `featuredProject` wiring; carried over unchanged for the same reason
+as #7/#8/#9.
+
+---
+
 ## Not yet checked
 
 This pass focused on global scroll behavior and the components most likely

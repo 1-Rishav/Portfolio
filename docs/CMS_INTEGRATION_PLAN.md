@@ -389,19 +389,44 @@ Anywhere a component currently does `hardcodedArray.map(...)`. The fetch +
 loading/empty-state shape is the same every time (see Category 8) — only the
 schema and the rendered markup differ.
 
-- ⬜ About — Skills ticker (`skillTickerItem`)
-- ⬜ About — Web3 ticker (`web3TickerItem`)
-- ⬜ Contact — FAQ list (`faqItem`)
-- ⬜ Develop/Design Services — service name lists (`serviceItem`, filtered by category)
-- ⬜ Develop/Design Services — project showcase ticker (`serviceShowcaseProject`, shared by both pages)
-- ⬜ Home — hero parallax products (`heroProject`)
-- ⬜ Home — timeline grid (`timelineProject`)
-- ⬜ Home — featured project cards (`featuredProject`)
-- ⬜ Mern/Pern — tech stack list, feature highlights list (part of `projectHighlight`, Category 6)
+- ✅ **4.1 — Foundation:** `useSanityList(query, fallback)` hook
+- ✅ **4.2 — About:** Skills ticker, Web3 ticker (`skillTickerItem`, `web3TickerItem`)
+- ✅ **4.3 — Contact:** FAQ list (`faqItem`)
+- ✅ **4.4 — Develop/Design Services:** service name lists (`serviceGroup`, filtered by page) — turned out to cover heading/subheading/accentChar too, not just `services` (see session log)
+- ✅ **4.5 — Develop/Design Services:** project showcase ticker (`serviceShowcaseProject`, shared by both pages) - via one shared hook, not a query repeated in each page file
+- ✅ **4.6 — Develop/Design:** hero media (`sectionIntro` — Develop's rotating image set, Design's video) — via a new single-document hook, `useSanityDocument`, not `useSanityList`
+- ✅ **4.7 — Home:** hero parallax products (`heroProject`) - also wired the schema's per-image alt text into `ProductCard`, previously unused
+- ✅ **4.8 — Home:** timeline grid (`timelineProject`, plus `sectionIntro`'s Home-Timeline journey-year fields) — ✅ bullet marker resolved as presentation (listItem.bullet), not stored content; only the 2 years are dynamic, the heading/intro paragraph stay hardcoded (confirmed against 2.9's own resolution)
+- ✅ **4.9 — Home:** featured project cards (`featuredProject`) — `ProjectDescription.jsx`'s 4 exported components collapsed into one, `FeaturedProjectContent`, driven by the schema's fields; also wired `cardImage`'s alt text into `apple_card_carousel.jsx`'s `Card`, same gap as 4.7's `ProductCard`
 
-**DRY note:** one small `useSanityList(query)` hook, built once, covers every
-line above — each becomes "call the hook with this query," not a bespoke
-fetch implementation per component.
+**Category 4 complete.** All 9 tasks done. Every remaining hardcoded list in
+the client now has a Sanity-backed counterpart with the original content as
+its fallback, so the site is unchanged until real content exists (same
+fallback-first guarantee as every category so far). One thing does NOT
+carry that guarantee yet: `client/src/assets/Images/` (19 files - the
+featured/hero project screenshots, the Rishav photos, 2 logos) is still
+missing from every zip since 4.1 first found the gap, so `npm run build`
+only succeeds here with a temporary, non-shipped diagnostic stub - it will
+not succeed on a real checkout until those files are back. Confirmed again,
+not assumed, at the start of 4.9.
+- ✂️ Mern/Pern — tech stack list, feature highlights list: not a Category 4 task, part of `projectHighlight`, done in Category 6
+
+**4.6 added to the plan, wasn't in the original 8 bullets.** `sectionIntro`
+(built in 2.9) has 4 instances — Home-Hero, Home-Timeline, Develop-Hero,
+Design-Hero — but the original list only ever named `heroProject`,
+`timelineProject` and `featuredProject` for Home; Develop/Design's own two
+instances (the rotating image set behind Develop's hero, the video behind
+Design's) had no task claiming them. Home-Timeline's instance is folded into
+4.8 instead of getting its own line, since it's the same page and component
+as `timelineProject`. Home-Hero's instance is schema-ready (a `tagline`
+field) but still not assigned anywhere, on purpose: architecture decision 12
+already chose to leave the Home hero's heading and paragraph hardcoded, so
+wiring that field is a deliberate call for whichever task eventually reaches
+it, not an oversight to fix now.
+
+**DRY note:** one small `useSanityList(query, fallback)` hook, built once in
+4.1, covers every task above — each becomes "call the hook with this query,"
+not a bespoke fetch implementation per component.
 
 ## Category 5 — Media Asset Migration
 Separate from Category 4 because it's a different problem: not just *where
