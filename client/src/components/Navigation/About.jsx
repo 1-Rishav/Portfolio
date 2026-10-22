@@ -6,6 +6,8 @@ import { Separator } from '@/components/ui/separator'
 import { GoArrowUpRight } from 'react-icons/go';
 import images from '../../assets/index'
 import { useSiteSettings } from '../../hooks/use_site_settings'
+import { useSanityList } from '../../hooks/use_sanity_list'
+import { resolveImage } from '../../utils/sanityClient'
 
 // Shared by all three aboutBio blocks below: the only mark the schema (Category 2.6) defines beyond the
 // defaults is `underline`, matching "creativity"/"quality"/"flexible" in the current copy - strong/em render
@@ -13,6 +15,10 @@ import { useSiteSettings } from '../../hooks/use_site_settings'
 const bioMarks = {
   underline: ({ children }) => <span className='underline'>{children}</span>,
 }
+
+// Category 4, task 4.2. Order matches the shared tickerImageSchema's own `displayOrderAsc` ordering.
+const SKILL_TICKER_QUERY = `*[_type == "skillTickerItem"] | order(displayOrder asc){image}`
+const WEB3_TICKER_QUERY = `*[_type == "web3TickerItem"] | order(displayOrder asc){image}`
 
 function About() {
 
@@ -54,6 +60,16 @@ const carouselLeftSet = useRef(null);
     images.Explore9,
     images.Explore10,
   ]
+
+  // 4.2: webImages/Web3Images above stay exactly as they were - they're now this ticker's per-image fallback
+  // source (resolveImage's 2nd/3rd args below), not the rendered array directly. A placeholder {image: null}
+  // per slot is enough for useSanityList's own fallback: resolveImage treats a null image as "use the local
+  // fallback," so the real rendering fallback is still webImages/Web3Images, just one step further along.
+  const skillDocs = useSanityList(SKILL_TICKER_QUERY, webImages.map(() => ({ image: null })))
+  const skillTickerImages = skillDocs.map((doc, index) => resolveImage(doc.image, webImages[index], `custom-img-${index}`))
+
+  const web3Docs = useSanityList(WEB3_TICKER_QUERY, Web3Images.map(() => ({ image: null })))
+  const web3TickerImages = web3Docs.map((doc, index) => resolveImage(doc.image, Web3Images[index], `custom-img-${index}`))
   
 useLayoutEffect(() => {
   const setupCarousel = (trackRef, firstSetRef, direction) => {
@@ -356,7 +372,7 @@ useLayoutEffect(() => {
     className="flex shrink-0 gap-7 pr-7"
     aria-hidden="true"
   >
-    <CustomImages images={webImages} />
+    <CustomImages images={skillTickerImages} />
   </div>
 
   {/* Original copy */}
@@ -364,7 +380,7 @@ useLayoutEffect(() => {
     ref={carouselRightSet}
     className="flex shrink-0 gap-7 pr-7"
   >
-    <CustomImages images={webImages} />
+    <CustomImages images={skillTickerImages} />
   </div>
 </div>
             </div>
@@ -397,7 +413,7 @@ useLayoutEffect(() => {
     ref={carouselLeftSet}
     className="flex shrink-0 gap-7 pr-7"
   >
-    <CustomImages images={Web3Images} />
+    <CustomImages images={web3TickerImages} />
   </div>
 
   {/* Duplicate copy */}
@@ -405,7 +421,7 @@ useLayoutEffect(() => {
     className="flex shrink-0 gap-7 pr-7"
     aria-hidden="true"
   >
-    <CustomImages images={Web3Images} />
+    <CustomImages images={web3TickerImages} />
   </div>
 </div>
             </div>
