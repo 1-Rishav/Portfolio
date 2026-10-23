@@ -10,7 +10,16 @@ import { Separator } from '@/components/ui/separator';
 import { design, other } from '../Data/Develop_DesignData';
 import CustomImages from '../Form_&_Features/CustomImages';
 import FeatureComponent from '../Form_&_Features/FeatureComponent';
-import images from '../../assets/index';
+import { useSanityList } from '../../hooks/use_sanity_list';
+import { useServiceShowcaseImages } from '../../hooks/use_service_showcase_images';
+import { useSanityDocument } from '../../hooks/use_sanity_document';
+
+// 4.4: index [0] is Design, [1] is Other - see Develop_Service.jsx's identical comment on its own query.
+const DESIGN_GROUPS_QUERY = `*[_type == "serviceGroup" && page == "design"] | order(displayOrder asc){heading, subheading, accentChar, services}`;
+
+// 4.6: sectionIntro's design-hero instance - only its `video` field is relevant here. No resolveImage step
+// needed, unlike Develop's hero (4.6, same task) - `video` is a plain url field, not a Sanity image reference.
+const DESIGN_HERO_QUERY = `*[_type == "sectionIntro" && sectionKey == "design-hero"][0]{video}`;
 
 function Design_Service() {
   const carouselRef = useRef(null);
@@ -18,20 +27,9 @@ function Design_Service() {
 
   const videoRef = useRef(null);
 
-  const ProjectImages = [
-    images.Project1_i,
-    images.Project2,
-    images.GemX_Logo,
-    images.Project1,
-    images.Quick_Logo,
-    images.Project3,
-    images.Project4,
-    images.Project5,
-    images.Project6,
-    images.Project7,
-    images.Project8,
-    images.Project9,
-  ];
+  const designGroups = useSanityList(DESIGN_GROUPS_QUERY, [design, other]);
+  const showcaseImages = useServiceShowcaseImages();
+  const designHero = useSanityDocument(DESIGN_HERO_QUERY, { video: '/ProjectVideos/advertise.mp4' });
 
   /*
    * ---------------------------------------------------------
@@ -229,7 +227,7 @@ function Design_Service() {
           >
             <video
               ref={videoRef}
-              src="/ProjectVideos/advertise.mp4"
+              src={designHero.video}
               loop
               playsInline
               preload="auto"
@@ -315,19 +313,19 @@ function Design_Service() {
       <Separator className="mt-16" />
 
       <FeatureComponent
-        heading=" Design"
-        subheading="As a web designer, I blend creativity with functionality to ensure that each website not only looks stunning but also performs seamlessly "
-        service={design}
-        end="."
+        heading={designGroups[0]?.heading}
+        subheading={designGroups[0]?.subheading}
+        service={(designGroups[0]?.services ?? []).map((name, index) => ({ id: index + 1, service: name }))}
+        end={designGroups[0]?.accentChar}
       />
 
       <Separator className="mt-16" />
 
       <FeatureComponent
-        heading="Other"
-        subheading="I ensure that each project is cohesive, user-centric, and aligned with your brand’s goals.Let’s work together to design something extraordinary "
-        service={other}
-        end="!"
+        heading={designGroups[1]?.heading}
+        subheading={designGroups[1]?.subheading}
+        service={(designGroups[1]?.services ?? []).map((name, index) => ({ id: index + 1, service: name }))}
+        end={designGroups[1]?.accentChar}
       />
 
       <Separator className="mt-16" />
@@ -399,7 +397,7 @@ function Design_Service() {
                   pr-7
                 "
               >
-                <CustomImages images={ProjectImages} />
+                <CustomImages images={showcaseImages} />
               </div>
 
               {/* Second copy */}
@@ -412,7 +410,7 @@ function Design_Service() {
                 "
                 aria-hidden="true"
               >
-                <CustomImages images={ProjectImages} />
+                <CustomImages images={showcaseImages} />
               </div>
 
             </div>
